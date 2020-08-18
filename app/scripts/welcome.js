@@ -1,5 +1,9 @@
 (() => {
 
+  window.onmessage = ({ data }) => {
+    console.log('MSG:', data);
+  };
+
   const newProjBtn = document.querySelector('#btn-new');
   const openProjBtn = document.querySelector('#btn-open');
 
@@ -8,7 +12,7 @@
   });
 
   openProjBtn.addEventListener('click', () => {
-    const openProjWin = window.open('./openProject.html', '_blank', 'width=800,height=600');
+    const openProjWin = window.open('./openProject.html', '_blank', 'width=1000,height=600');
   });
 
 })();
