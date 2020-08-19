@@ -1,7 +1,34 @@
+/**
+ * Removes welcome and sets up project view
+ * @param {{
+ *  name: string,
+ *  id: number,
+ *  date: string,
+ *  notes: string
+ * }} project 
+ */
+async function onProjectSelect(project) {
+  document.body.innerHTML = '';
+
+  const { promises: fs } = require('fs');
+  const { join } = require('path');
+
+  const styleLink = document.createElement('link');
+  styleLink.rel = 'stylesheet';
+  styleLink.href = join(__dirname, './styles/project.css');
+  document.head.appendChild(styleLink);
+
+  const htmlSrcPath = join(__dirname, './projectTemplate.html');
+  document.body.innerHTML = await fs.readFile(htmlSrcPath, 'utf8');
+}
+
 (() => {
 
-  window.onmessage = ({ data }) => {
-    console.log('MSG:', data);
+  window.onmessage = async ({ data }) => {
+    if (data.name === 'PROJECT_SELECTED') {
+      await onProjectSelect(data.project);
+      return;
+    }
   };
 
   const newProjBtn = document.querySelector('#btn-new');
