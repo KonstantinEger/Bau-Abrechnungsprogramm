@@ -1,44 +1,59 @@
 <div class="project-header">
   <div id="name">
     Projektname:
+    <span id="project-name-display"></span>
   </div>
   <div id="place">
     Ort:
+    <span id="project-place-display"></span>
   </div>
   <div id="date">
     Datum:
+    <span id="project-date-display"></span>
   </div>
   <div id="notes">
     Bemerkungen:
-    <textarea cols="30" rows="10"></textarea>
   </div>
+  <textarea id="notes-input" cols="50" rows="10"></textarea>
 </div>
 
 <div class="body-grid-3">
-  <div class="materials-col">
-    <div class="col-header">Materialkosten</div>
-    <table>
-      <tr>
-        <th>Name:</th>
-        <th>Rechnungsnummer:</th>
-        <th>Betrag in €:</th>
-      </tr>
-    </table>
+  <div class="column" id="materials-col">
+    <div class="col-body">
+      <span class="heading">Materialkosten</span>
+      <table>
+        <tr>
+          <th>Name:</th>
+          <th>Rechnungsnummer:</th>
+          <th>Betrag in €:</th>
+        </tr>
+      </table>
+    </div>
+    <div class="col-footer">
+      <button class="btn btn-primary">Hinzufügen</button>
+    </div>
   </div>
 
-  <div class="wages-col">
-    <div class="col-header">Lohnkosten</div>
-    <table>
-      <tr>
-        <th>Typ:</th>
-        <th>Stunden:</th>
-        <th></th>
-      </tr>
-    </table>
+  <div class="column" id="wages-col">
+    <div class="col-body">
+      <span class="heading">Lohnkosten</span>
+      <table>
+        <tr>
+          <th>Typ:</th>
+          <th>Stunden:</th>
+          <th></th>
+        </tr>
+      </table>
+    </div>
+    <div class="col-footer">
+      <button class="btn btn-primary">Typ hinzufügen</button>
+    </div>
   </div>
 
-  <div class="bill-col">
-    <div class="col-header">Rechnung</div>
-
+  <div class="column" id="bill-col">
+    <div class="section-top">
+      <span class="heading">Rechnung</span>
+    </div>
+    <div class="section-bottom"></div>
   </div>
 </div>

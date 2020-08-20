@@ -3,12 +3,16 @@
  * @param {{
  *  name: string,
  *  id: number,
+ *  place: string,
  *  date: string,
  *  notes: string
  * }} project 
  */
 async function onProjectSelect(project) {
+  if (!project) return;
+
   document.body.innerHTML = '';
+  document.title = 'Bau-Abrechnungen | Projekt | ' + project.name;
 
   const { promises: fs } = require('fs');
   const { join } = require('path');
@@ -20,6 +24,11 @@ async function onProjectSelect(project) {
 
   const htmlSrcPath = join(__dirname, './projectTemplate.html');
   document.body.innerHTML = await fs.readFile(htmlSrcPath, 'utf8');
+
+  document.getElementById('project-name-display').textContent = project.name;
+  document.getElementById('project-place-display').textContent = project.place;
+  document.getElementById('project-date-display').textContent = project.date;
+  document.getElementById('notes-input').value = project.notes;
 }
 
 (() => {
@@ -41,5 +50,14 @@ async function onProjectSelect(project) {
   openProjBtn.addEventListener('click', () => {
     const openProjWin = window.open('./openProject.html', '_blank', 'width=1000,height=600');
   });
+
+  // uncomment next call to skip project seletion on start
+  // onProjectSelect({
+  //   name: '%projectname%',
+  //   id: 0,
+  //   place: '%place%',
+  //   date: '%date%',
+  //   notes: '%notes%'
+  // });
 
 })();

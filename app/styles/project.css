@@ -1,0 +1,45 @@
+.project-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.5fr 2.5fr;
+  height: 100px;
+  background-color: var(--bg-light);
+}
+
+.project-header > div {
+  padding: 10px;
+}
+
+.project-header > textarea {
+  height: 84px;
+  margin-top: 5px;
+  resize: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+}
+
+span#project-name-display,
+span#project-place-display,
+span#project-date-display {
+  display: block;
+  margin-top: 10px;
+}
+
+span#project-name-display {
+  color: var(--primary-color);
+}
+
+.body-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: calc(100vh - 103px);
+  border-top: 3px solid var(--primary-color);
+}
+
+.column#materials-col, .column#wages-col {
+  border-right: 2px solid var(--primary-color);
+}
+
+.column#materials-col > .col-body,
+.column#wages-col > .col-body {
+  height: calc(100vh - 170px);
+}

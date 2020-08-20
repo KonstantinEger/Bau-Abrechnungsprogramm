@@ -3,18 +3,21 @@ const projects = [
   {
     name: 'Bautzen Schützenplatz',
     id: 1,
+    place: 'Bautzen',
     date: '15. Okt. 2019',
     notes: 'Rem cumque vel qui voluptates alias. '
   },
   {
     name: 'Nechern Abwasser',
     id: 2,
+    place: 'Nechern',
     date: '10. Okt. 2019',
     notes: 'Praesentium est officia consequuntur ea nihil non. Aut nihil cupiditate incidunt qui neque modi est.'
   },
   {
     name: 'Bautzen Bahnhofstraße',
     id: 3,
+    place: 'Bautzen',
     date: '23. Sept. 2019',
     notes: 'Quibusdam ipsa qui minus similique aspernatur totam dolor et.'
   }
