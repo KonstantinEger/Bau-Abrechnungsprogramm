@@ -30,7 +30,8 @@ body {
 }
 
 .btn.btn-small {
-  width: 100px;
+  width: fit-content;
+  height: auto;
   font-size: 13pt;
   margin: auto;
 }
