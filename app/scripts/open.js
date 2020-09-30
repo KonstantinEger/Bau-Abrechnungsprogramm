@@ -40,7 +40,7 @@ const shortenString = (str, len) => {
  */
 const handleBtnClick = (event) => {
   window.opener.postMessage({
-    name: 'PROJECT_SELECTED',
+    name: 'OPEN_PROJECT',
     project: projects.find(p => p.id === parseInt(event.target.id))
   });
   window.close();

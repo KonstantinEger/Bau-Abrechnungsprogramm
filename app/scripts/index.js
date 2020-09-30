@@ -8,7 +8,7 @@
  *  notes: string
  * }} project 
  */
-async function onProjectSelect(project) {
+async function openProject(project) {
   if (!project) return;
 
   document.body.innerHTML = '';
@@ -34,8 +34,8 @@ async function onProjectSelect(project) {
 (() => {
 
   window.onmessage = async ({ data }) => {
-    if (data.name === 'PROJECT_SELECTED') {
-      await onProjectSelect(data.project);
+    if (data.name === 'OPEN_PROJECT') {
+      await openProject(data.project);
       return;
     }
   };
@@ -44,15 +44,15 @@ async function onProjectSelect(project) {
   const openProjBtn = document.querySelector('#btn-open');
 
   newProjBtn.addEventListener('click', () => {
-    const newProjWin = window.open('./newProject.html', '_blank', 'width=800,height=600');
+    window.open('./newProject.html', '_blank', 'width=800,height=600');
   });
 
   openProjBtn.addEventListener('click', () => {
-    const openProjWin = window.open('./openProject.html', '_blank', 'width=1000,height=600');
+    window.open('./openProject.html', '_blank', 'width=1000,height=600');
   });
 
   // uncomment next call to skip project seletion on start
-  // onProjectSelect({
+  // openProject({
   //   name: '%projectname%',
   //   id: 0,
   //   place: '%place%',
