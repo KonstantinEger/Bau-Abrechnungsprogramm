@@ -1,3 +1,5 @@
+const { remote } = require('electron');
+
 /**
  * Removes welcome and sets up project view
  * @param {{
@@ -47,8 +49,29 @@ async function openProject(project) {
     window.open('./newProject.html', '_blank', 'width=800,height=600');
   });
 
-  openProjBtn.addEventListener('click', () => {
-    window.open('./openProject.html', '_blank', 'width=1000,height=600');
+  openProjBtn.addEventListener('click', async () => {
+    // https://www.brainbell.com/javascript/show-open-dialog.html#show-open-dialog
+
+    const dialog = remote.dialog;
+    const browserWin = remote.getCurrentWindow();
+
+    let opts = {
+      title: 'Bauprojekt öffnen',
+      defaultPath: process.env.HOME || process.env.HOMEPATH,
+      buttonLabel: 'Öffnen',
+      filters: [
+        {name: 'Bauprojekt', extensions: ['tbvp.csv']},
+        {name: 'CSV', extensions: ['csv']},
+        {name: 'Alle Datein', extensions: ['*']}
+      ],
+      properties: ['openFile']
+    };
+
+    const { canceled, filePaths } = await dialog.showOpenDialog(browserWin, opts);
+    if (canceled || filePaths.length === 0) return;
+
+    // TODO: read and parse file
+    // call 'openProject' with data
   });
 
   // uncomment next call to skip project seletion on start

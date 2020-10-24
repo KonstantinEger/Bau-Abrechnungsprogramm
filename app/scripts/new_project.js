@@ -1,4 +1,6 @@
-document.getElementById('create-project-btn').addEventListener('click', () => {
+const { remote } = require('electron');
+
+document.getElementById('create-project-btn').addEventListener('click', async () => {
   const nameInput = document.getElementById('project-name-input');
   const placeInput = document.getElementById('project-place-input');
   const dateInput = document.getElementById('project-date-input');
@@ -29,6 +31,26 @@ document.getElementById('create-project-btn').addEventListener('click', () => {
 
   // TODO: generate ID
   const id = 6;
+
+  const dialog = remote.dialog;
+  const browserWin = remote.getCurrentWindow();
+
+  // https://www.brainbell.com/javascript/show-save-dialog.html
+
+  let opts = {
+    title: 'Neues Projekt speichern',
+    defaultPath : (process.env.HOME || process.env.HOMEPATH) + `\\${nameInput.value}.tbvp.csv`,
+    buttonLabel : 'Neues Bauprojekt Speichern',
+    filters :[
+      {name: 'Bauprojekt', extensions: ['tbvp.csv']},
+      {name: 'Alle Datein', extensions: ['*']}
+    ]
+  }
+
+  let { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
+  if (canceled || !filePath) return;
+
+  // TODO: Write to disk
 
   window.opener.postMessage({
     name: 'OPEN_PROJECT',
