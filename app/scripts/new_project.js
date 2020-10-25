@@ -1,16 +1,7 @@
 const { remote } = require('electron');
 const { promises: fs } = require('fs');
 
-function genID() {
-	const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
-
-	return `${s5()}-${s5()}-${s5()}`;
-}
-
-function genCSVfromProject(project) {
-	return 'id,name,date,place,description,brutto,m-names,m-prices,h-types,h-amounts,h-wages,\n'
-		+ `${project.id},${project.name},${project.date},${project.place},${project.notes},0,,,,,,`
-}
+const { Project } = require('./scripts/lib/Project');
 
 document.getElementById('create-project-btn').addEventListener('click', async () => {
 	const nameInput = document.getElementById('project-name-input');
@@ -21,6 +12,7 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 	placeInput.classList.remove('invalid');
 	dateInput.classList.remove('invalid');
 
+	// input validation
 	{
 		let exitDueToError = false;
 		if (nameInput.value.length === 0) {
@@ -41,11 +33,9 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 		if (exitDueToError) return;
 	}
 
+	// save-dialog
 	const dialog = remote.dialog;
 	const browserWin = remote.getCurrentWindow();
-
-	// https://www.brainbell.com/javascript/show-save-dialog.html
-
 	let opts = {
 		title: 'Neues Projekt speichern',
 		defaultPath : (process.env.HOME || process.env.HOMEPATH) + `\\${nameInput.value}.tbvp.csv`,
@@ -55,24 +45,27 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 			{name: 'Alle Datein', extensions: ['*']}
 		]
 	}
-
 	let { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
 	if (canceled || !filePath) return;
 
-	const project = {
-		id: genID(),
-		name: nameInput.value,
-		date: dateInput.value,
-		place: placeInput.value,
-		notes: notesInput.value
-	}
+	// create project instance and write to disk
+	// TODO: Error-handling with fs-errors
+	const project = new Project(
+		nameInput.value,
+		dateInput.value,
+		placeInput.value,
+		notesInput.value,
+		0,
+		[],
+		[]
+	);
+	await fs.writeFile(filePath, project.toCSV());
 
-	await fs.writeFile(filePath, genCSVfromProject(project));
-
-	window.opener.postMessage({
-		name: 'OPEN_PROJECT',
-		project
-	});
+	// RECIEVING END CAN'T HANDLE THE PROJECT CLASS-INSTANCE FOR NOW
+	// window.opener.postMessage({
+	// 	name: 'OPEN_PROJECT',
+	// 	project
+	// });
 
 	window.close();
 });
