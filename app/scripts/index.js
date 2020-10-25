@@ -8,7 +8,7 @@ const { remote } = require('electron');
  *  place: string,
  *  date: string,
  *  notes: string
- * }} project 
+ * }} project
  */
 async function openProject(project) {
 	if (!project) return;
@@ -42,13 +42,13 @@ async function openProject(project) {
 		}
 	};
 
+	
 	const newProjBtn = document.querySelector('#btn-new');
-	const openProjBtn = document.querySelector('#btn-open');
-
 	newProjBtn.addEventListener('click', () => {
 		window.open('./new_project.html', '_blank', 'width=800,height=600');
 	});
-
+	
+	const openProjBtn = document.querySelector('#btn-open');
 	openProjBtn.addEventListener('click', async () => {
 		// https://www.brainbell.com/javascript/show-open-dialog.html#show-open-dialog
 
