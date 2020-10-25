@@ -1,62 +1,62 @@
 :root {
-  --primary-color: #0c7a68;
-  --secundary-color: #fd6e3a;
-  --bg-light: #e9e9e9;
+	--primary-color: #0c7a68;
+	--secundary-color: #fd6e3a;
+	--bg-light: #e9e9e9;
 }
 
 body {
-  margin: 0px;
-  background-color: #ffffff;
-  font-family: sans-serif;
+	margin: 0px;
+	background-color: #ffffff;
+	font-family: sans-serif;
 }
 
 .btn {
-  font-size: 16pt;
-  font-weight: lighter;
-  width: 220px;
-  margin: 8px;
-  padding: 10px 13px;
-  border: none;
-  border-radius: 13px;
-  color: #ffffff;
+	font-size: 16pt;
+	font-weight: lighter;
+	width: 220px;
+	margin: 8px;
+	padding: 10px 13px;
+	border: none;
+	border-radius: 13px;
+	color: #ffffff;
 }
 
 .btn.btn-primary {
-  background-color: var(--primary-color);
+	background-color: var(--primary-color);
 }
 
 .btn.btn-secundary {
-  background-color: var(--secundary-color);
+	background-color: var(--secundary-color);
 }
 
 .btn.btn-grey {
-  background-color: rgb(201, 201, 201);
-  color: rgb(51, 51, 51);
+	background-color: rgb(201, 201, 201);
+	color: rgb(51, 51, 51);
 }
 
 .btn.btn-small {
-  width: fit-content;
-  height: auto;
-  font-size: 13pt;
-  margin: auto;
+	width: fit-content;
+	height: auto;
+	font-size: 13pt;
+	margin: auto;
 }
 
 .center {
-  text-align: center;
-  padding: auto;
+	text-align: center;
+	padding: auto;
 }
 
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  padding-bottom: 10px;
-  color: #838383;
-  font-size: 11pt;
-  text-align: center;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	padding-bottom: 10px;
+	color: #838383;
+	font-size: 11pt;
+	text-align: center;
 }
 
 .header {
-  padding: 30px 50px;
-  padding-bottom: 0;
+	padding: 30px 50px;
+	padding-bottom: 0;
 }

@@ -1,22 +1,22 @@
 {
-  "name": "abrechnungsprogramm",
-  "version": "0.0.0",
-  "description": "Desktop App für Bau-Abrechnungen",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/KonstantinEger/Bau-Abrechnungsprogramm.git"
-  },
-  "author": "KonstantinEger",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/KonstantinEger/Bau-Abrechnungsprogramm/issues"
-  },
-  "homepage": "https://github.com/KonstantinEger/Bau-Abrechnungsprogramm#readme",
-  "dependencies": {
-    "electron": "^9.2.0"
-  }
+	"name": "abrechnungsprogramm",
+	"version": "0.0.0",
+	"description": "Desktop App für Bau-Abrechnungen",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/KonstantinEger/Bau-Abrechnungsprogramm.git"
+	},
+	"author": "KonstantinEger",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/KonstantinEger/Bau-Abrechnungsprogramm/issues"
+	},
+	"homepage": "https://github.com/KonstantinEger/Bau-Abrechnungsprogramm#readme",
+	"dependencies": {
+		"electron": "^9.2.0"
+	}
 }
