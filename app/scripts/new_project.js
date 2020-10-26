@@ -3,6 +3,15 @@ const { promises: fs } = require('fs');
 
 const { Project } = require('./scripts/lib/Project');
 
+/**
+ * When the new-btn is clicked
+ * [x] open a new BrowserWindow where the user can input
+ *   relevant data for the project
+ * [x] this fn is called when input is done
+ * [x] input is validated
+ * [x] new Project instance is sent to main window ("OPEN_PROJECT")
+ *   and opened
+ */
 document.getElementById('create-project-btn').addEventListener('click', async () => {
 	const nameInput = document.getElementById('project-name-input');
 	const placeInput = document.getElementById('project-place-input');
@@ -60,6 +69,11 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 		);
 	// TODO: Error-handling with fs-errors
 	await fs.writeFile(filePath, project.toCSV());
+
+	window.opener.postMessage({
+		name: 'OPEN_PROJECT',
+		project
+	});
 
 	window.close();
 });

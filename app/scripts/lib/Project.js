@@ -20,14 +20,14 @@ class Project {
 	 * @param {Array<{ type: string; amount: number; wage: number }>} hours
 	 */
 	constructor(name, date, place, description, brutto, materials = [], hours = []) {
-		this._id = genID();
-		this._name = name;
-		this._date = date;
-		this._place = place;
-		this._descr = description;
-		this._brutto = brutto;
-		this._materials = materials;
-		this._hours = hours;
+		this.id = genID();
+		this.name = name;
+		this.date = date;
+		this.place = place;
+		this.descr = description;
+		this.brutto = brutto;
+		this.materials = materials;
+		this.hours = hours;
 	}
 
 	/**
@@ -41,19 +41,19 @@ class Project {
 		// create the CSV string. This could be optimized later but for now this
 		// is a solution for ease of use.
 		let result = 'id,name,date,place,description,brutto,m-names,m-prices,h-types,h-amounts,h-wages,\n'
-		+ `${this._id},${this._name},${this._date},${this._place},${this._descr},${this._brutto},---,---,---,---,---,\n`;
+		+ `${this.id},${this.name},${this.date},${this.place},${this.descr},${this.brutto},---,---,---,---,---,\n`;
 
-		for (let i = 0; i < Math.max(this._materials.length, this._hours.length); i++) {
+		for (let i = 0; i < Math.max(this.materials.length, this.hours.length); i++) {
 			let str = ',,,,,,';
 
-			if (this._materials[i] !== undefined) {
-				str += `${this._materials[i].name},${this._materials[i].price},`;
+			if (this.materials[i] !== undefined) {
+				str += `${this.materials[i].name},${this.materials[i].price},`;
 			} else {
 				str += '---,---,';
 			}
 
-			if (this._hours[i] !== undefined) {
-				str += `${this._hours[i].type},${this._hours[i].amount},${this._hours[i].wage},\n`;
+			if (this.hours[i] !== undefined) {
+				str += `${this.hours[i].type},${this.hours[i].amount},${this.hours[i].wage},\n`;
 			} else {
 				str += '---,---,---,\n';
 			}
