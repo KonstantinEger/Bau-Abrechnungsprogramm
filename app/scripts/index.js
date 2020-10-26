@@ -42,15 +42,26 @@ async function openProject(project) {
 		}
 	};
 
-	
-	const newProjBtn = document.querySelector('#btn-new');
-	newProjBtn.addEventListener('click', () => {
+	/**
+	 * When the new-btn is clicked
+	 * - open a new BrowserWindow where the user can input
+	 *   relevant data for the project
+	 * - input is validated
+	 * - new Project instance is sent to main window ("OPEN_PROJECT")
+	 *   and opened
+	 */
+	document.querySelector('#btn-new').addEventListener('click', () => {
 		window.open('./new_project.html', '_blank', 'width=800,height=600');
 	});
-	
-	const openProjBtn = document.querySelector('#btn-open');
-	openProjBtn.addEventListener('click', async () => {
-		// https://www.brainbell.com/javascript/show-open-dialog.html#show-open-dialog
+
+	/**
+	 * When the open-btn is clicked:
+	 * - open "open file" dialog
+	 * - read file at user specified location
+	 * - parse string into Project instance
+	 * - open project
+	 */
+	document.querySelector('#btn-open').addEventListener('click', async () => {
 
 		const dialog = remote.dialog;
 		const browserWin = remote.getCurrentWindow();
@@ -73,14 +84,4 @@ async function openProject(project) {
 		// TODO: read and parse file
 		// call 'openProject' with data
 	});
-
-	// uncomment next call to skip project seletion on start
-	// openProject({
-	//   name: '%projectname%',
-	//   id: 0,
-	//   place: '%place%',
-	//   date: '%date%',
-	//   notes: '%notes%'
-	// });
-
 })();

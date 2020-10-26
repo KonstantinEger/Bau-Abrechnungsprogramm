@@ -1,13 +1,6 @@
 /**
- * Returns the greater value
- * @param {number} a
- * @param {number} b
- */
-const max = (a, b) => a >= b ? a : b;
-
-/**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
- * @returns string
+ * @returns {string} ID
  */
 function genID() {
 	const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
@@ -37,6 +30,11 @@ class Project {
 		this._hours = hours;
 	}
 
+	/**
+	 * Creates a string with the Project info in CSV format
+	 * for saving it to disk.
+	 * @returns {string} String in CSV format
+	 */
 	toCSV() {
 		// --- values will be skipped when parsing the csv back into a Project
 		// filling the last 5 cells with --- now makes for an easier logic to
@@ -45,7 +43,7 @@ class Project {
 		let result = 'id,name,date,place,description,brutto,m-names,m-prices,h-types,h-amounts,h-wages,\n'
 		+ `${this._id},${this._name},${this._date},${this._place},${this._descr},${this._brutto},---,---,---,---,---,\n`;
 
-		for (let i = 0; i < max(this._materials.length, this._hours.length); i++) {
+		for (let i = 0; i < Math.max(this._materials.length, this._hours.length); i++) {
 			let str = ',,,,,,';
 
 			if (this._materials[i] !== undefined) {
@@ -64,6 +62,16 @@ class Project {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Parses a string e.g. read from a CSV file into a new
+	 * Project instance.
+	 * @param {string} source Source string read from CSV file
+	 * @returns {Project} new Project
+	 */
+	static fromCSV(source) {
+		console.warn('Project::fromCSV not implemented yet!');
 	}
 }
 

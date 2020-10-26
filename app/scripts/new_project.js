@@ -49,7 +49,6 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 	if (canceled || !filePath) return;
 
 	// create project instance and write to disk
-	// TODO: Error-handling with fs-errors
 	const project = new Project(
 		nameInput.value,
 		dateInput.value,
@@ -58,14 +57,9 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 		0,
 		[],
 		[]
-	);
+		);
+	// TODO: Error-handling with fs-errors
 	await fs.writeFile(filePath, project.toCSV());
-
-	// RECIEVING END CAN'T HANDLE THE PROJECT CLASS-INSTANCE FOR NOW
-	// window.opener.postMessage({
-	// 	name: 'OPEN_PROJECT',
-	// 	project
-	// });
 
 	window.close();
 });
