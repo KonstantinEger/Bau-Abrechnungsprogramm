@@ -1,4 +1,18 @@
-document.getElementById('create-project-btn').addEventListener('click', () => {
+const { remote } = require('electron');
+const { promises: fs } = require('fs');
+
+const { Project } = require('./scripts/lib/Project');
+
+/**
+ * When the new-btn is clicked
+ * [x] open a new BrowserWindow where the user can input
+ *   relevant data for the project
+ * [x] this fn is called when input is done
+ * [x] input is validated
+ * [x] new Project instance is sent to main window ("OPEN_PROJECT")
+ *   and opened
+ */
+document.getElementById('create-project-btn').addEventListener('click', async () => {
 	const nameInput = document.getElementById('project-name-input');
 	const placeInput = document.getElementById('project-place-input');
 	const dateInput = document.getElementById('project-date-input');
@@ -7,6 +21,7 @@ document.getElementById('create-project-btn').addEventListener('click', () => {
 	placeInput.classList.remove('invalid');
 	dateInput.classList.remove('invalid');
 
+	// input validation
 	{
 		let exitDueToError = false;
 		if (nameInput.value.length === 0) {
@@ -27,18 +42,37 @@ document.getElementById('create-project-btn').addEventListener('click', () => {
 		if (exitDueToError) return;
 	}
 
-	// TODO: generate ID
-	const id = 6;
+	// save-dialog
+	const dialog = remote.dialog;
+	const browserWin = remote.getCurrentWindow();
+	let opts = {
+		title: 'Neues Projekt speichern',
+		defaultPath : (process.env.HOME || process.env.HOMEPATH) + `\\${nameInput.value}.tbvp.csv`,
+		buttonLabel : 'Neues Bauprojekt Speichern',
+		filters :[
+			{name: 'Bauprojekt', extensions: ['tbvp.csv']},
+			{name: 'Alle Datein', extensions: ['*']}
+		]
+	}
+	let { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
+	if (canceled || !filePath) return;
+
+	// create project instance and write to disk
+	const project = new Project(
+		nameInput.value,
+		dateInput.value,
+		placeInput.value,
+		notesInput.value,
+		0,
+		[],
+		[]
+		);
+	// TODO: Error-handling with fs-errors
+	await fs.writeFile(filePath, project.toCSV());
 
 	window.opener.postMessage({
 		name: 'OPEN_PROJECT',
-		project: {
-			id,
-			name: nameInput.value,
-			date: dateInput.value,
-			place: placeInput.value,
-			notes: notesInput.value
-		}
+		project
 	});
 
 	window.close();

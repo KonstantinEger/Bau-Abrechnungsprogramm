@@ -22,25 +22,10 @@ Programm zur Vereinfachung von Abrechnungen der Baufirma "Tiefbau Vogel"
   - auch als Prozentsatz
 
 ## Wie Daten gespeichert werden
-- projects.csv
-  - `projectname`: String; Name des Projektes
-  - `projectid`: Integer; ID-Nummer
-  - `place`: String; Ort der Baustelle
-  - `date`: String; Datum des Baus
-  - `bill`: Float; Brutto-Rechnungssumme
-  - `notes`: String; Bemerkungen
-- materials.csv
-  - `projectid`: Integer; Verweis auf das Projekt
-  - `type`: Integer; ID für den Materialtyp
-  - `billnum`: String; Rechnungsnummer
-  - `value`: Float; Geldmenge
-- wages.csv
-  - `projectid`: Integer; Verweis auf das Projekt
-  - `type`: Integer; ID für Lohntyp
-  - `value`: Float; Stundenanzahl
-- data.json: sonstige Daten wie:
-  - welcher Lohn-/Materialtyp welchen Namen hat (oder Farbe?)
-  - Settings
+- jedes Projekt wird als eine `.tbvp.csv` Datei gespeichert
+- diese Datei besteht aus folgenden Spalten: `id`, `name`, `date`, `place`, `description`, `brutto`, `m-names`, `m-prices`, `h-types`, `h-amounts`, `h-wages` (m=Materials, h=Hours)
+- beim Erstellen eines neuen Projektes wird nach der Eingabe der Daten ein Save-Dialog vom OS geöffnet, wo der User einen Speicherort auswählt
+- beim Öffnen wird ein Open-Dialog vom OS geöffnet, wo der User eine Projektdatei auswählt, welche dann geladen und verarbeitet werden kann
 
 ## License
 This Project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/).
