@@ -1,4 +1,6 @@
 const { remote } = require('electron');
+const { promises: fs } = require('fs');
+const { Project } = require('./lib/Project');
 
 /**
  * When the open-btn is clicked:
@@ -25,6 +27,10 @@ async function openProjectDialog() {
 
 	const { canceled, filePaths } = await dialog.showOpenDialog(browserWin, opts);
 	if (canceled || filePaths.length === 0) return;
+
+	// TODO: Error handling
+	let csvString = await fs.readFile(filePaths[0], 'utf8');
+	return Project.fromCSV(csvString);
 }
 
 module.exports = openProjectDialog;

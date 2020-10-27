@@ -8,6 +8,47 @@ function genID() {
 	return `${s5()}-${s5()}-${s5()}`;
 }
 
+/**
+ * Splits an input string at "," while also regarding starting
+ * and end quotes, where commas should be ignored.
+ * ### Note
+ * This function only works when there ar no empty fields like:
+ * `Hello,,World,`. Empty fields are ignored. It should be changed
+ * to `Hello,---,World`
+ * 
+ * ### Example
+ * ```js
+ * let str = `Hello,World,"Hello,World"`;
+ * let result = splitCSVstring(str);
+ * assert(result, ['Hello', 'World', 'Hello,World']);
+ * ```
+ * 
+ * Whitespace at front and end of a field are removed:
+ * ```js
+ * let str = 'Hello, World';
+ * assert(splitCSVstring(str), ['Hello', 'World']);
+ * ```
+ * 
+ * Empty fields are removed:
+ * ```js
+ * let str = 'Hello,,World';
+ * assert(splitCSVstring(str), ['Hello', 'World']);
+ * ```
+ * 
+ * ### Source
+ * Shamelessly ripped of the internet. Original by [martinp999](https://stackoverflow.com/users/580772/martinp999)
+ * from a comment to [this answer](https://stackoverflow.com/a/11457952) on stack overflow.
+ * @param {string} str input string
+ * @returns {Array<string>} output string array
+ */
+function splitCSVstring(str) {
+	let regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+	let arr = [];
+	let res;
+	while ((res = regexp.exec(str)) !== null) { arr.push(res[0].replace(/(?:^")|(?:"$)/g, '')); }
+	return arr;
+}
+
 class Project {
 	/**
 	 * @param {string} id Project-ID
@@ -18,9 +59,10 @@ class Project {
 	 * @param {number} brutto Brutto total
 	 * @param {Array<{ name: string; price: string }>} materials
 	 * @param {Array<{ type: string; amount: number; wage: number }>} hours
+	 * @param {boolean} generateID if an ID should be generated
 	 */
-	constructor(name, date, place, description, brutto, materials = [], hours = []) {
-		this.id = genID();
+	constructor(name, date, place, description, brutto, materials = [], hours = [], generateID = true) {
+		this.id = generateID ? genID() : '';
 		this.name = name;
 		this.date = date;
 		this.place = place;
@@ -38,22 +80,22 @@ class Project {
 	toCSV() {
 		// --- values will be skipped when parsing the csv back into a Project
 		// filling the last 5 cells with --- now makes for an easier logic to
-		// create the CSV string. This could be optimized later but for now this
-		// is a solution for ease of use.
+		// create the CSV string. Its also necessary for the splitCSVstring
+		// funktion to work.
 		let result = 'id,name,date,place,description,brutto,m-names,m-prices,h-types,h-amounts,h-wages,\n'
-		+ `${this.id},${this.name},${this.date},${this.place},${this.descr},${this.brutto},---,---,---,---,---,\n`;
+		+ `${this.id},"${this.name}",${this.date},"${this.place}","${this.descr}",${this.brutto},---,---,---,---,---,\n`;
 
 		for (let i = 0; i < Math.max(this.materials.length, this.hours.length); i++) {
 			let str = ',,,,,,';
 
 			if (this.materials[i] !== undefined) {
-				str += `${this.materials[i].name},${this.materials[i].price},`;
+				str += `"${this.materials[i].name}",${this.materials[i].price},`;
 			} else {
 				str += '---,---,';
 			}
 
 			if (this.hours[i] !== undefined) {
-				str += `${this.hours[i].type},${this.hours[i].amount},${this.hours[i].wage},\n`;
+				str += `"${this.hours[i].type}",${this.hours[i].amount},${this.hours[i].wage},\n`;
 			} else {
 				str += '---,---,---,\n';
 			}
@@ -66,12 +108,33 @@ class Project {
 
 	/**
 	 * Parses a string e.g. read from a CSV file into a new
-	 * Project instance.
+	 * Project instance. **Note** If parsing fails, undefined is
+	 * returned.
 	 * @param {string} source Source string read from CSV file
-	 * @returns {Project} new Project
+	 * @returns {Project | undefined} new Project
 	 */
 	static fromCSV(source) {
-		console.warn('Project::fromCSV not implemented yet!');
+		const data = splitCSVstring(source).slice(11);
+		const project = new Project(data[1], data[2], data[3], data[4], parseFloat(data[5]), [], [], false);
+		project.id = data[0];
+
+		let matAndHoursArray = data.slice(11);
+		for (let i = 0; i < matAndHoursArray.length; i += 5) {
+			if (matAndHoursArray[i] !== '---') {
+				project.materials.push({
+					name: matAndHoursArray[i], price: matAndHoursArray[i + 1]
+				});
+			}
+			if (matAndHoursArray[i + 2] !== '---') {
+				project.hours.push({
+					type: matAndHoursArray[i + 2],
+					amount: parseFloat(matAndHoursArray[i + 3]),
+					wage: parseFloat(matAndHoursArray[i + 4])
+				});
+			}
+		}
+		
+		return project;
 	}
 }
 
