@@ -57,7 +57,7 @@ class Project {
 	 * @param {string} place
 	 * @param {string} description Project description
 	 * @param {number} brutto Brutto total
-	 * @param {Array<{ name: string; price: string }>} materials
+	 * @param {Array<{ name: string; receiptID: string; price: string }>} materials
 	 * @param {Array<{ type: string; amount: number; wage: number }>} hours
 	 * @param {boolean} generateID if an ID should be generated
 	 */
@@ -82,16 +82,16 @@ class Project {
 		// filling the last 5 cells with --- now makes for an easier logic to
 		// create the CSV string. Its also necessary for the splitCSVstring
 		// funktion to work.
-		let result = 'id,name,date,place,description,brutto,m-names,m-prices,h-types,h-amounts,h-wages,\n'
-		+ `${this.id},"${this.name}",${this.date},"${this.place}","${this.descr}",${this.brutto},---,---,---,---,---,\n`;
+		let result = 'id,name,date,place,description,brutto,m-names,m-receipt-ids,m-prices,h-types,h-amounts,h-wages,\n'
+		+ `${this.id},"${this.name}",${this.date},"${this.place}","${this.descr}",${this.brutto},---,---,---,---,---,---,\n`;
 
 		for (let i = 0; i < Math.max(this.materials.length, this.hours.length); i++) {
 			let str = ',,,,,,';
 
 			if (this.materials[i] !== undefined) {
-				str += `"${this.materials[i].name}",${this.materials[i].price},`;
+				str += `"${this.materials[i].name}","${this.materials[i].receiptID}",${this.materials[i].price},`;
 			} else {
-				str += '---,---,';
+				str += '---,---,---,';
 			}
 
 			if (this.hours[i] !== undefined) {
@@ -114,22 +114,24 @@ class Project {
 	 * @returns {Project | undefined} new Project
 	 */
 	static fromCSV(source) {
-		const data = splitCSVstring(source).slice(11);
+		const data = splitCSVstring(source).slice(12);
 		const project = new Project(data[1], data[2], data[3], data[4], parseFloat(data[5]), [], [], false);
 		project.id = data[0];
 
-		let matAndHoursArray = data.slice(11);
-		for (let i = 0; i < matAndHoursArray.length; i += 5) {
+		let matAndHoursArray = data.slice(12);
+		for (let i = 0; i < matAndHoursArray.length; i += 6) {
 			if (matAndHoursArray[i] !== '---') {
 				project.materials.push({
-					name: matAndHoursArray[i], price: matAndHoursArray[i + 1]
+					name: matAndHoursArray[i],
+					receiptID: matAndHoursArray[i + 1],
+					price: matAndHoursArray[i + 2],
 				});
 			}
-			if (matAndHoursArray[i + 2] !== '---') {
+			if (matAndHoursArray[i + 3] !== '---') {
 				project.hours.push({
-					type: matAndHoursArray[i + 2],
-					amount: parseFloat(matAndHoursArray[i + 3]),
-					wage: parseFloat(matAndHoursArray[i + 4])
+					type: matAndHoursArray[i + 3],
+					amount: parseFloat(matAndHoursArray[i + 4]),
+					wage: parseFloat(matAndHoursArray[i + 5])
 				});
 			}
 		}
