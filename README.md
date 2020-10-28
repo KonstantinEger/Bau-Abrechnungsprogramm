@@ -23,7 +23,7 @@ Programm zur Vereinfachung von Abrechnungen der Baufirma "Tiefbau Vogel"
 
 ## Wie Daten gespeichert werden
 - jedes Projekt wird als eine `.tbvp.csv` Datei gespeichert
-- diese Datei besteht aus folgenden Spalten: `id`, `name`, `date`, `place`, `description`, `brutto`, `m-names`, `m-prices`, `h-types`, `h-amounts`, `h-wages` (m=Materials, h=Hours)
+- diese Datei besteht aus folgenden Spalten: `id`, `name`, `date`, `place`, `description`, `brutto`, `m-names`, `m-receipt-ids`, `m-prices`, `h-types`, `h-amounts`, `h-wages` (m=Materials, h=Hours)
 - beim Erstellen eines neuen Projektes wird nach der Eingabe der Daten ein Save-Dialog vom OS geöffnet, wo der User einen Speicherort auswählt
 - beim Öffnen wird ein Open-Dialog vom OS geöffnet, wo der User eine Projektdatei auswählt, welche dann geladen und verarbeitet werden kann
 
