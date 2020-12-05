@@ -114,3 +114,7 @@ span#project-name-display {
 	width: 40%;
 	text-align: right;
 }
+
+.column#bill-col div#bilanz-display.negative {
+	color: var(--secundary-color);
+}
