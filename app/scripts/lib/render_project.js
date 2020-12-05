@@ -35,12 +35,12 @@ function renderBillCol(project) {
 	$('#brutto-bill-input').value = project.brutto;
 	const mwst = 0.19;
 	const netto = project.brutto - (project.brutto * mwst);
-	$('#netto-bill-display').textContent = netto + '€';
+	$('#netto-bill-display').textContent = roundTo(netto, 2) + '€';
 
 	const expenses = calcTotalExpenses(project);
 	const bilanz = netto - expenses;
-	$('#bilanz-euros-display').textContent = bilanz + '€';
-	$('#bilanz-percent-display').textContent = ((bilanz / project.brutto) * 100) + '%';
+	$('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
+	$('#bilanz-percent-display').textContent = roundTo((bilanz / netto) * 100, 2) + '%';
 	if (bilanz < 0) $('#bilanz-display').classList.add('negative');
 }
 
@@ -48,6 +48,15 @@ function calcTotalExpenses(project) {
 	let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
 	let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
 	return matExps + wagesExps;
+}
+
+function roundTo(num, decimals) {
+	const str = num.toLocaleString('en-US', {
+		minimumFractionDigits: decimals,
+		maximumFractionDigits: decimals
+	});
+
+	return parseFloat(str);
 }
 
 module.exports = renderProject;
