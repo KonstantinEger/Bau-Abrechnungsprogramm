@@ -115,6 +115,10 @@ span#project-name-display {
 	text-align: right;
 }
 
+.column#bill-col div#bilanz-display #bilanz-euros-display {
+	font-weight: bold;
+}
+
 .column#bill-col div#bilanz-display.negative {
 	color: var(--secundary-color);
 }

@@ -14,6 +14,8 @@ async function renderProject(project) {
 	$('#project-date-display').textContent = project.date;
 	$('#notes-input').value = project.descr;
 
+	renderMatCol(project);
+	renderWagesCol(project);
 	renderBillCol(project);
 }
 
@@ -31,23 +33,60 @@ async function loadCSSandHTML() {
 	document.body.innerHTML = await fs.readFile(htmlSrcPath, 'utf8');
 }
 
+function renderMatCol(project) {
+	const table = $('#mat-table');
+	for (let mat of project.materials) {
+		const tr = document.createElement('tr');
+		const td1 = document.createElement('td');
+		const td2 = document.createElement('td');
+		const td3 = document.createElement('td');
+		td1.textContent = mat.name;
+		td2.textContent = mat.receiptID;
+		td3.textContent = mat.price;
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tr.appendChild(td3);
+		table.appendChild(tr);
+	}
+}
+
+function renderWagesCol(project) {
+	const table = $('#wages-table');
+	for (let data of project.hours) {
+		const tr = document.createElement('tr');
+		const td1 = document.createElement('td');
+		const td2 = document.createElement('td');
+		const td3 = document.createElement('td');
+
+		td1.textContent = data.type + ' - ' + data.wage + '€';
+		td2.textContent = data.amount;
+
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tr.appendChild(td3);
+		table.appendChild(tr);
+	}
+}
+
 function renderBillCol(project) {
 	$('#brutto-bill-input').value = project.brutto;
 	const mwst = 0.19;
 	const netto = project.brutto - (project.brutto * mwst);
 	$('#netto-bill-display').textContent = roundTo(netto, 2) + '€';
 
-	const expenses = calcTotalExpenses(project);
-	const bilanz = netto - expenses;
+	const expenses = calcExpenses(project);
+	const bilanz = netto - (expenses[0] + expenses[1]);
+	$('#material-costs-display').textContent = expenses[0] + '€';
+	$('#wages-costs-display').textContent = expenses[1] + '€';
 	$('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
 	$('#bilanz-percent-display').textContent = roundTo((bilanz / netto) * 100, 2) + '%';
 	if (bilanz < 0) $('#bilanz-display').classList.add('negative');
 }
 
-function calcTotalExpenses(project) {
+function calcExpenses(project) {
 	let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
 	let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
-	return matExps + wagesExps;
+	return [matExps, wagesExps];
 }
 
 function roundTo(num, decimals) {
