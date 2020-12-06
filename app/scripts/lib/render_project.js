@@ -51,12 +51,7 @@ function calcTotalExpenses(project) {
 }
 
 function roundTo(num, decimals) {
-	const str = num.toLocaleString('en-US', {
-		minimumFractionDigits: decimals,
-		maximumFractionDigits: decimals
-	});
-
-	return parseFloat(str);
+	return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
 
 module.exports = renderProject;
