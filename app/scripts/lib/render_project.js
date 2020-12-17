@@ -79,7 +79,9 @@ function renderBillCol(project) {
 	$('#material-costs-display').textContent = expenses[0] + '€';
 	$('#wages-costs-display').textContent = expenses[1] + '€';
 	$('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
-	$('#bilanz-percent-display').textContent = roundTo((bilanz / netto) * 100, 2) + '%';
+	$('#bilanz-percent-display').textContent = netto !== 0
+		? roundTo((bilanz / netto) * 100, 2) + '%'
+		: '0.00%';
 	if (bilanz < 0) $('#bilanz-display').classList.add('negative');
 }
 
