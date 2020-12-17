@@ -30,6 +30,7 @@ async function openProjectDialog() {
 
 	// TODO: Error handling
 	let csvString = await fs.readFile(filePaths[0], 'utf8');
+	sessionStorage.setItem('CURRENT_PROJ', csvString);
 	return Project.fromCSV(csvString);
 }
 
