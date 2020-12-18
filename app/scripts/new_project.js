@@ -72,7 +72,8 @@ document.getElementById('create-project-btn').addEventListener('click', async ()
 
 	window.opener.postMessage({
 		name: 'OPEN_PROJECT',
-		project
+		project,
+		filePath
 	});
 
 	window.close();

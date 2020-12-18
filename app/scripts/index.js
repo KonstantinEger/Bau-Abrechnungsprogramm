@@ -17,6 +17,7 @@ const renderProject = require('./scripts/lib/render_project');
 			);
 			project.id = data.project.id;
 			sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
+			sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
 			renderProject(project);
 		}
 	};
