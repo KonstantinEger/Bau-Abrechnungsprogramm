@@ -1,3 +1,4 @@
+const { promises: fs } = require('fs');
 const { Project } = require('./scripts/lib/Project');
 const renderProject = require('./scripts/lib/render_project');
 
@@ -30,6 +31,20 @@ const renderProject = require('./scripts/lib/render_project');
 		}
 		const p = Project.fromCSV(projectString);
 		renderProject(p);
+	});
+
+	window.addEventListener('keypress', async (event) => {
+		if (event.code === 'KeyS' && event.ctrlKey === true) {
+			console.log('saving...')
+			const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+			const projectString = sessionStorage.getItem('CURRENT_PROJ');
+			if (!filePath || !projectString) {
+				console.warn('WARNING: filePath or projectString was not acceptable');
+				return
+			}
+			// TODO: Error-handling
+			await fs.writeFile(filePath, projectString);
+		}
 	});
 
 	document.querySelector('#btn-new').addEventListener('click', () => {
