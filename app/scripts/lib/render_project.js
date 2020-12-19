@@ -32,7 +32,7 @@ async function renderProject(project) {
 	}
 
 	$('#add-new-material-btn').onclick = () => {
-		window.open('./new_material.html', '_blank', 'width=800,height=600');
+		window.open('./new_material.html', '_blank', 'width=480,height=420');
 	}
 }
 

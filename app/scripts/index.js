@@ -20,6 +20,8 @@ const { renderProject, ...renderPartials } = require('./scripts/lib/render_proje
 			sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
 			sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
 			renderProject(project);
+		} else if (data.name === 'NEW_MATERIAL') {
+			console.log(data.material);
 		}
 	};
 
