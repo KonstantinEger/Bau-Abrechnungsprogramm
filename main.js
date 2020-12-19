@@ -2,6 +2,8 @@ const electron = require('electron');
 const url = require('url');
 const path = require('path');
 
+require('@electron/remote/main').initialize();
+
 const { app, BrowserWindow } = electron;
 
 app.on('ready', () => {
@@ -9,7 +11,8 @@ app.on('ready', () => {
 		width: 1300,
 		height: 900,
 		webPreferences: {
-			nodeIntegration: true
+			nodeIntegration: true,
+			enableRemoteModule: true
 		}
 	});
 	mainWindow.loadURL(url.format({
