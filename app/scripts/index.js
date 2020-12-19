@@ -1,10 +1,10 @@
 const { promises: fs } = require('fs');
 const { Project } = require('./scripts/lib/Project');
-const renderProject = require('./scripts/lib/render_project');
+const { renderProject, ...renderPartials } = require('./scripts/lib/render_project');
 
 (() => {
 
-	window.onmessage = async ({ data }) => {
+	window.onmessage = ({ data }) => {
 		if (data.name === 'OPEN_PROJECT') {
 			const project = new Project(
 				data.project.name,

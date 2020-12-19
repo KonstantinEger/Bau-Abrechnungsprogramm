@@ -111,4 +111,8 @@ function roundTo(num, decimals) {
 	return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
 
-module.exports = renderProject;
+module.exports = {
+	renderProject,
+	renderWagesCol,
+	renderMatCol
+};
