@@ -1,5 +1,6 @@
 const { promises: fs } = require('fs');
 const { join } = require('path');
+const { Project } = require('./Project');
 
 async function renderProject(project) {
 	if (!project) return;
@@ -17,6 +18,18 @@ async function renderProject(project) {
 	renderMatCol(project);
 	renderWagesCol(project);
 	renderBillCol(project);
+
+	$('#brutto-bill-input').oninput = event => {
+		const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
+		if (!oldProjStr) {
+			console.warn('WARNING: project string from session storage not acceptable');
+			return
+		}
+		const project = Project.fromCSV(oldProjStr);
+		project.brutto = parseFloat(event.target.value);
+		sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
+		renderBillCol(project);
+	}
 }
 
 function $(selector) {
@@ -80,9 +93,12 @@ function renderBillCol(project) {
 	$('#wages-costs-display').textContent = expenses[1] + '€';
 	$('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
 	$('#bilanz-percent-display').textContent = netto !== 0
-		? roundTo((bilanz / netto) * 100, 2) + '%'
-		: '0.00%';
-	if (bilanz < 0) $('#bilanz-display').classList.add('negative');
+	? roundTo((bilanz / netto) * 100, 2) + '%'
+	: '0.00%';
+
+	const bilanzDisp = $('#bilanz-display');
+	if (bilanz < 0) bilanzDisp.classList.add('negative')
+	else bilanzDisp.classList.remove('negative');
 }
 
 function calcExpenses(project) {
