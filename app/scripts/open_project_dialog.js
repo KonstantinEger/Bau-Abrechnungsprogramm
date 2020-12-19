@@ -1,4 +1,4 @@
-const { remote } = require('electron');
+const remote = require('@electron/remote');
 const { promises: fs } = require('fs');
 const { Project } = require('./lib/Project');
 
