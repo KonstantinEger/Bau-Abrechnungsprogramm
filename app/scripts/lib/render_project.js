@@ -52,6 +52,7 @@ async function loadCSSandHTML() {
 
 function renderMatCol(project) {
 	const table = $('#mat-table');
+	table.innerHTML = '';
 	for (let mat of project.materials) {
 		const tr = document.createElement('tr');
 		const td1 = document.createElement('td');
@@ -118,5 +119,6 @@ function roundTo(num, decimals) {
 module.exports = {
 	renderProject,
 	renderWagesCol,
-	renderMatCol
+	renderMatCol,
+	renderBillCol
 };

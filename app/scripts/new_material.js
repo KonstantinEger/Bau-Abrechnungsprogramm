@@ -31,7 +31,7 @@ document.getElementById('submit-btn').addEventListener('click', () => {
 		material: {
 			name: nameInput.value,
 			receiptID: receiptIdInput.value,
-			price: parseFloat(priceInput.value)
+			price: priceInput.value
 		}
 	});
 

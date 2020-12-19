@@ -4,7 +4,7 @@ const { renderProject, ...renderPartials } = require('./scripts/lib/render_proje
 
 (() => {
 
-	window.onmessage = ({ data }) => {
+	window.onmessage = async ({ data }) => {
 		if (data.name === 'OPEN_PROJECT') {
 			const project = new Project(
 				data.project.name,
@@ -21,14 +21,31 @@ const { renderProject, ...renderPartials } = require('./scripts/lib/render_proje
 			sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
 			renderProject(project);
 		} else if (data.name === 'NEW_MATERIAL') {
-			console.log(data.material);
+			const projectStr = sessionStorage.getItem('CURRENT_PROJ');
+			const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+			if (!projectStr || !filePath) {
+				console.warn('WARNING: project string or filepath from session storage not acceptable');
+				return
+			}
+			const project = Project.fromCSV(projectStr);
+			project.materials.push({
+				name: data.material.name,
+				receiptID: data.material.receiptID,
+				price: data.material.price
+			});
+			const newCSV = project.toCSV();
+			sessionStorage.setItem('CURRENT_PROJ', newCSV);
+			// TODO: Error handling
+			await fs.writeFile(filePath, newCSV);
+			renderPartials.renderMatCol(project);
+			renderPartials.renderBillCol(project);
 		}
 	};
 
 	window.addEventListener('render-project', () => {
 		const projectString = sessionStorage.getItem('CURRENT_PROJ');
 		if (projectString === null) {
-			console.warn('"render-project" event fired but no CURRENT_PROJ found.');
+			console.warn('WARNING: "render-project" event fired but no CURRENT_PROJ found.');
 			return
 		}
 		const p = Project.fromCSV(projectString);
@@ -37,7 +54,6 @@ const { renderProject, ...renderPartials } = require('./scripts/lib/render_proje
 
 	window.addEventListener('keypress', async (event) => {
 		if (event.code === 'KeyS' && event.ctrlKey === true) {
-			console.log('saving...')
 			const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
 			const projectString = sessionStorage.getItem('CURRENT_PROJ');
 			if (!filePath || !projectString) {
