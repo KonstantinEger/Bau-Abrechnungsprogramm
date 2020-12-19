@@ -30,6 +30,10 @@ async function renderProject(project) {
 		sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
 		renderBillCol(project);
 	}
+
+	$('#add-new-material-btn').onclick = () => {
+		window.open('./new_material.html', '_blank', 'width=800,height=600');
+	}
 }
 
 function $(selector) {

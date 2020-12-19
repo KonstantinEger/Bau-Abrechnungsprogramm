@@ -12,7 +12,7 @@ const { Project } = require('./scripts/lib/Project');
  * [x] new Project instance is sent to main window ("OPEN_PROJECT")
  *   and opened
  */
-document.getElementById('create-project-btn').addEventListener('click', async () => {
+document.getElementById('submit-btn').addEventListener('click', async () => {
 	const nameInput = document.getElementById('project-name-input');
 	const placeInput = document.getElementById('project-place-input');
 	const dateInput = document.getElementById('project-date-input');
