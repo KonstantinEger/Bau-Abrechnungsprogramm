@@ -34,6 +34,10 @@ async function renderProject(project) {
 	$('#add-new-material-btn').onclick = () => {
 		window.open('./new_material.html', '_blank', 'width=480,height=420');
 	}
+
+	$('#add-new-worker-type-btn').onclick = () => {
+		window.open('./new_worker_type.html', '_blank', 'width=480,height=420');
+	}
 }
 
 function $(selector) {
@@ -70,6 +74,7 @@ function renderMatCol(project) {
 
 function renderWagesCol(project) {
 	const table = $('#wages-table');
+	table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
 	for (let data of project.hours) {
 		const tr = document.createElement('tr');
 		const td1 = document.createElement('td');
