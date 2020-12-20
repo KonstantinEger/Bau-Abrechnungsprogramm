@@ -1,6 +1,8 @@
 const { promises: fs } = require('fs');
+const ipc = require('electron').ipcRenderer;
 const { Project } = require('./scripts/lib/Project');
 const { renderProject, ...renderPartials } = require('./scripts/lib/render_project');
+const openProjectDialog = require('./scripts/open_project_dialog');
 
 (() => {
 
@@ -89,6 +91,14 @@ const { renderProject, ...renderPartials } = require('./scripts/lib/render_proje
 	});
 
 	document.querySelector('#btn-open').addEventListener('click', () => {
-		require('./scripts/open_project_dialog')().then(renderProject);
+		openProjectDialog().then(renderProject);
 	});
 })();
+
+ipc.on('open:new-project-dialog', () => {
+	window.open('./new_project.html', '_blank', 'width=800,height=600');
+});
+
+ipc.on('open:open-project-dialog', () => {
+	openProjectDialog().then(renderProject);
+});
