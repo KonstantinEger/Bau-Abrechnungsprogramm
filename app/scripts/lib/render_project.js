@@ -52,7 +52,7 @@ async function loadCSSandHTML() {
 
 function renderMatCol(project) {
 	const table = $('#mat-table');
-	table.innerHTML = '';
+	table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
 	for (let mat of project.materials) {
 		const tr = document.createElement('tr');
 		const td1 = document.createElement('td');
