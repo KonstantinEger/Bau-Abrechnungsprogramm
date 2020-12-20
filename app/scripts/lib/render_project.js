@@ -30,6 +30,10 @@ async function renderProject(project) {
 		sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
 		renderBillCol(project);
 	}
+
+	$('#add-new-material-btn').onclick = () => {
+		window.open('./new_material.html', '_blank', 'width=480,height=420');
+	}
 }
 
 function $(selector) {
@@ -48,6 +52,7 @@ async function loadCSSandHTML() {
 
 function renderMatCol(project) {
 	const table = $('#mat-table');
+	table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
 	for (let mat of project.materials) {
 		const tr = document.createElement('tr');
 		const td1 = document.createElement('td');
@@ -111,4 +116,9 @@ function roundTo(num, decimals) {
 	return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
 
-module.exports = renderProject;
+module.exports = {
+	renderProject,
+	renderWagesCol,
+	renderMatCol,
+	renderBillCol
+};

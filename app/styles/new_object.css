@@ -1,3 +1,5 @@
+/* Styles associated with dialogs for new projects, materials or worker types */
+
 body {
 	overflow: hidden;
 }
@@ -22,6 +24,6 @@ textarea {
 	height: 40px;
 }
 
-button#create-project-btn {
+button#submit-btn {
 	margin-left: 20px;
 }
