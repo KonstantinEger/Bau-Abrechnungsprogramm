@@ -28,11 +28,30 @@ async function renderProject(project) {
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
         if (!oldProjStr || !projectLoc) {
             console.warn('WARNING: project-string or filepath from session storage not acceptable');
-            return
+            return;
         }
         const project = Project.fromCSV(oldProjStr);
         project.brutto = parseFloat(inputValue);
         renderBillCol(project);
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(projectLoc, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+    });
+
+    $('#notes-input').oninput = delayEvent(750, async (event) => {
+        const inputValue = event.target.value;
+        const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
+        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjStr || !projectLoc) {
+            console.warn('WARNING: project-string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(oldProjStr);
+        project.descr = inputValue;
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
