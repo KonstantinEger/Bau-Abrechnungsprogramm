@@ -1,6 +1,6 @@
 const remote = require('@electron/remote');
 const { promises: fs } = require('fs');
-
+const { throwFatalErr, throwErr } = require('./scripts/errors');
 const { Project } = require('./scripts/lib/Project');
 
 /**
@@ -39,7 +39,10 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
             exitDueToError = true;
         }
 
-        if (exitDueToError) return;
+        if (exitDueToError) {
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            return;
+        }
     }
 
     // save-dialog
@@ -67,8 +70,12 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         [],
         []
     );
-    // TODO: Error-handling with fs-errors
-    await fs.writeFile(filePath, project.toCSV());
+
+    try {
+        await fs.writeFile(filePath, project.toCSV());
+    } catch (err) {
+        throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+    }
 
     window.opener.postMessage({
         name: 'OPEN_PROJECT',

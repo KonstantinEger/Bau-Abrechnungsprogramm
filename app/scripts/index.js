@@ -3,6 +3,7 @@ const ipc = require('electron').ipcRenderer;
 const { Project } = require('./scripts/lib/Project');
 const { renderProject, ...renderPartials } = require('./scripts/lib/render_project');
 const openProjectDialog = require('./scripts/open_project_dialog');
+const { throwFatalErr } = require('./scripts/errors');
 
 (() => {
 
@@ -37,8 +38,11 @@ const openProjectDialog = require('./scripts/open_project_dialog');
             });
             const newCSV = project.toCSV();
             sessionStorage.setItem('CURRENT_PROJ', newCSV);
-            // TODO: Error handling
-            await fs.writeFile(filePath, newCSV);
+            try {
+                await fs.writeFile(filePath, newCSV);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
             renderPartials.renderMatCol(project);
             renderPartials.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
@@ -56,8 +60,11 @@ const openProjectDialog = require('./scripts/open_project_dialog');
             });
             const newCSV = project.toCSV();
             sessionStorage.setItem('CURRENT_PROJ', newCSV);
-            // TODO: Error handling
-            await fs.writeFile(filePath, newCSV);
+            try {
+                await fs.writeFile(filePath, newCSV);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
             renderPartials.renderWagesCol(project);
             renderPartials.renderBillCol(project);
         }
@@ -71,8 +78,11 @@ const openProjectDialog = require('./scripts/open_project_dialog');
                 console.warn('WARNING: filePath or projectString was not acceptable');
                 return
             }
-            // TODO: Error-handling
-            await fs.writeFile(filePath, projectString);
+            try {
+                await fs.writeFile(filePath, projectString);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
         }
     });
 
