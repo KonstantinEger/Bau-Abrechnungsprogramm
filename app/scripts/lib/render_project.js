@@ -1,6 +1,8 @@
 const { promises: fs } = require('fs');
 const { join } = require('path');
 const { Project } = require('./Project');
+const { delayEvent } = require('./utils');
+const { throwFatalErr } = require('../errors');
 
 async function renderProject(project) {
     if (!project) return;
@@ -13,23 +15,55 @@ async function renderProject(project) {
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
     $('#project-date-display').textContent = project.date;
-    $('#notes-input').value = project.descr;
+    $('#notes-input').value = project.descr
+        .replaceAll('{{c}}', ',')
+        .replaceAll('{{dq}}', '"');
 
     renderMatCol(project);
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = event => {
+    $('#brutto-bill-input').oninput = delayEvent(750, async (event) => {
+        const inputValue = event.target.value;
+        if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
-        if (!oldProjStr) {
-            console.warn('WARNING: project string from session storage not acceptable');
-            return
+        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjStr || !projectLoc) {
+            console.warn('WARNING: project-string or filepath from session storage not acceptable');
+            return;
         }
         const project = Project.fromCSV(oldProjStr);
-        project.brutto = parseFloat(event.target.value);
-        sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
+        project.brutto = parseFloat(inputValue);
         renderBillCol(project);
-    }
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(projectLoc, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+    });
+
+    $('#notes-input').oninput = delayEvent(750, async (event) => {
+        const inputValue = event.target.value;
+        const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
+        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjStr || !projectLoc) {
+            console.warn('WARNING: project-string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(oldProjStr);
+        project.descr = inputValue
+            .replaceAll(',', '{{c}}')
+            .replaceAll('"', '{{dq}}');
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(projectLoc, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+    });
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
