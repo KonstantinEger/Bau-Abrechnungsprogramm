@@ -42,6 +42,7 @@ span#project-name-display {
 .column#materials-col > .col-body,
 .column#wages-col > .col-body {
     height: calc(100vh - 170px);
+    overflow-y: scroll;
 }
 
 /* Header of each section */
