@@ -99,8 +99,8 @@ function renderBillCol(project) {
 
 	const expenses = calcExpenses(project);
 	const bilanz = netto - (expenses[0] + expenses[1]);
-	$('#material-costs-display').textContent = expenses[0] + '€';
-	$('#wages-costs-display').textContent = expenses[1] + '€';
+	$('#material-costs-display').textContent = roundTo(expenses[0], 2) + '€';
+	$('#wages-costs-display').textContent = roundTo(expenses[1], 2) + '€';
 	$('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
 	$('#bilanz-percent-display').textContent = netto !== 0
 	? roundTo((bilanz / netto) * 100, 2) + '%'
