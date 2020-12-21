@@ -63,16 +63,6 @@ const openProjectDialog = require('./scripts/open_project_dialog');
 		}
 	};
 
-	window.addEventListener('render-project', () => {
-		const projectString = sessionStorage.getItem('CURRENT_PROJ');
-		if (projectString === null) {
-			console.warn('WARNING: "render-project" event fired but no CURRENT_PROJ found.');
-			return
-		}
-		const p = Project.fromCSV(projectString);
-		renderProject(p);
-	});
-
 	window.addEventListener('keypress', async (event) => {
 		if (event.code === 'KeyS' && event.ctrlKey === true) {
 			const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
