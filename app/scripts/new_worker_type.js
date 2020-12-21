@@ -1,3 +1,5 @@
+const { throwErr } = require('./scripts/errors');
+
 document.getElementById('type-name-input').focus();
 
 document.getElementById('submit-btn').addEventListener('click', () => {
@@ -15,7 +17,7 @@ document.getElementById('submit-btn').addEventListener('click', () => {
             exitDueToError = true;
         }
 
-        if (wageInput.value.length === 0 || parseFloat(wageInput.value) < 0) {
+        if (wageInput.value.length === 0 || parseFloat(wageInput.value) <= 0) {
             wageInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -25,7 +27,10 @@ document.getElementById('submit-btn').addEventListener('click', () => {
             exitDueToError = true;
         }
 
-        if (exitDueToError) return;
+        if (exitDueToError) {
+			throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+			return;
+		}
     }
 
     window.opener.postMessage({

@@ -1,3 +1,7 @@
+const { throwErr } = require('./scripts/errors');
+
+document.getElementById('mat-name-input').focus();
+
 document.getElementById('submit-btn').addEventListener('click', () => {
     const nameInput = document.getElementById('mat-name-input');
     const receiptIdInput = document.getElementById('receipt-id-input');
@@ -23,7 +27,10 @@ document.getElementById('submit-btn').addEventListener('click', () => {
             exitDueToError = true;
         }
 
-        if (exitDueToError) return;
+        if (exitDueToError) {
+			throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+			return;
+		}
     }
 
     window.opener.postMessage({

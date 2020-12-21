@@ -1,6 +1,7 @@
 const remote = require('@electron/remote');
 const { promises: fs } = require('fs');
 const { Project } = require('./lib/Project');
+const { throwFatalErr } = require('./errors');
 
 /**
  * When the open-btn is clicked:
@@ -28,8 +29,12 @@ async function openProjectDialog() {
     const { canceled, filePaths } = await dialog.showOpenDialog(browserWin, opts);
     if (canceled || filePaths.length === 0) return;
 
-    // TODO: Error handling
-    let csvString = await fs.readFile(filePaths[0], 'utf8');
+	let csvString;
+	try {
+		csvString = await fs.readFile(filePaths[0], 'utf8');
+	} catch (err) {
+		throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+	}
     sessionStorage.setItem('CURRENT_PROJ', csvString);
     sessionStorage.setItem('CURRENT_PROJ_LOC', filePaths[0]);
     return Project.fromCSV(csvString);
