@@ -4,7 +4,7 @@ const path = require('path');
 
 require('@electron/remote/main').initialize();
 
-const { app, BrowserWindow, Menu } = electron;
+const { app, BrowserWindow, Menu, ipcMain } = electron;
 
 app.on('ready', () => {
     const mainWindow = new BrowserWindow({
@@ -66,3 +66,5 @@ app.on('ready', () => {
 
     Menu.setApplicationMenu(menu);
 });
+
+ipcMain.once('quit-app', () => app.quit());
