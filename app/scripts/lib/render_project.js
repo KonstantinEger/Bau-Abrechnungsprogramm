@@ -1,6 +1,7 @@
 const { promises: fs } = require('fs');
 const { join } = require('path');
 const { Project } = require('./Project');
+const { delayEvent } = require('./utils');
 
 async function renderProject(project) {
     if (!project) return;
@@ -19,17 +20,19 @@ async function renderProject(project) {
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = event => {
+    $('#brutto-bill-input').oninput = delayEvent(750, event => {
+        const inputValue = event.target.value;
+        if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         if (!oldProjStr) {
             console.warn('WARNING: project string from session storage not acceptable');
             return
         }
         const project = Project.fromCSV(oldProjStr);
-        project.brutto = parseFloat(event.target.value);
+        project.brutto = parseFloat(inputValue);
         sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
         renderBillCol(project);
-    }
+    });
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
