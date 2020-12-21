@@ -1,33 +1,33 @@
 /* Styles associated with dialogs for new projects, materials or worker types */
 
 body {
-	overflow: hidden;
+    overflow: hidden;
 }
 
 label {
-	margin-left: 20px;
+    margin-left: 20px;
 }
 
 input {
-	width: 60%;
-	margin: 7px 20px;
-	height: 22px;
+    width: 60%;
+    margin: 7px 20px;
+    height: 22px;
 }
 
 input[type="number"] {
-	text-align: right;
+    text-align: right;
 }
 
 input.invalid {
-	border: 1px solid var(--secundary-color);
+    border: 1px solid var(--secundary-color);
 }
 
 textarea {
-	width: calc(100% - 40px);
-	margin: 7px 20px;
-	height: 40px;
+    width: calc(100% - 40px);
+    margin: 7px 20px;
+    height: 40px;
 }
 
 button#submit-btn {
-	margin-left: 20px;
+    margin-left: 20px;
 }
