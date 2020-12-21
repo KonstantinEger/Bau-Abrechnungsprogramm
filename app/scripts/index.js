@@ -39,10 +39,10 @@ const { throwFatalErr } = require('./scripts/errors');
             const newCSV = project.toCSV();
             sessionStorage.setItem('CURRENT_PROJ', newCSV);
             try {
-				await fs.writeFile(filePath, newCSV);
-			} catch (err) {
-				throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-			}
+                await fs.writeFile(filePath, newCSV);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
             renderPartials.renderMatCol(project);
             renderPartials.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
@@ -61,10 +61,10 @@ const { throwFatalErr } = require('./scripts/errors');
             const newCSV = project.toCSV();
             sessionStorage.setItem('CURRENT_PROJ', newCSV);
             try {
-				await fs.writeFile(filePath, newCSV);
-			} catch (err) {
-				throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-			}
+                await fs.writeFile(filePath, newCSV);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
             renderPartials.renderWagesCol(project);
             renderPartials.renderBillCol(project);
         }
@@ -79,10 +79,10 @@ const { throwFatalErr } = require('./scripts/errors');
                 return
             }
             try {
-				await fs.writeFile(filePath, projectString);
-			} catch (err) {
-				throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-			}
+                await fs.writeFile(filePath, projectString);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
         }
     });
 

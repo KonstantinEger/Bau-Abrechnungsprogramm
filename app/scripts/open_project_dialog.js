@@ -29,12 +29,12 @@ async function openProjectDialog() {
     const { canceled, filePaths } = await dialog.showOpenDialog(browserWin, opts);
     if (canceled || filePaths.length === 0) return;
 
-	let csvString;
-	try {
-		csvString = await fs.readFile(filePaths[0], 'utf8');
-	} catch (err) {
-		throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-	}
+    let csvString;
+    try {
+        csvString = await fs.readFile(filePaths[0], 'utf8');
+    } catch (err) {
+        throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+    }
     sessionStorage.setItem('CURRENT_PROJ', csvString);
     sessionStorage.setItem('CURRENT_PROJ_LOC', filePaths[0]);
     return Project.fromCSV(csvString);

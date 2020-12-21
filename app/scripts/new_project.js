@@ -40,9 +40,9 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         }
 
         if (exitDueToError) {
-			throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
-			return;
-		}
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            return;
+        }
     }
 
     // save-dialog
@@ -69,13 +69,13 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         0,
         [],
         []
-	);
+    );
 
     try {
-		await fs.writeFile(filePath, project.toCSV());
-	} catch (err) {
-		throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-	}
+        await fs.writeFile(filePath, project.toCSV());
+    } catch (err) {
+        throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+    }
 
     window.opener.postMessage({
         name: 'OPEN_PROJECT',

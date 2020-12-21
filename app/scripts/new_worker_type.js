@@ -28,9 +28,9 @@ document.getElementById('submit-btn').addEventListener('click', () => {
         }
 
         if (exitDueToError) {
-			throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
-			return;
-		}
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            return;
+        }
     }
 
     window.opener.postMessage({
