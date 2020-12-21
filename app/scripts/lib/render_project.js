@@ -15,7 +15,9 @@ async function renderProject(project) {
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
     $('#project-date-display').textContent = project.date;
-    $('#notes-input').value = project.descr;
+    $('#notes-input').value = project.descr
+        .replaceAll('{{c}}', ',')
+        .replaceAll('{{dq}}', '"');
 
     renderMatCol(project);
     renderWagesCol(project);
@@ -51,7 +53,9 @@ async function renderProject(project) {
             return;
         }
         const project = Project.fromCSV(oldProjStr);
-        project.descr = inputValue;
+        project.descr = inputValue
+            .replaceAll(',', '{{c}}')
+            .replaceAll('"', '{{dq}}');
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
