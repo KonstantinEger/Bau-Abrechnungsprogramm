@@ -2,6 +2,7 @@ const { promises: fs } = require('fs');
 const { join } = require('path');
 const { Project } = require('./Project');
 const { delayEvent } = require('./utils');
+const { throwFatalErr } = require('../errors');
 
 async function renderProject(project) {
     if (!project) return;
@@ -20,18 +21,25 @@ async function renderProject(project) {
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = delayEvent(750, event => {
+    $('#brutto-bill-input').oninput = delayEvent(750, async (event) => {
         const inputValue = event.target.value;
         if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
-        if (!oldProjStr) {
-            console.warn('WARNING: project string from session storage not acceptable');
+        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjStr || !projectLoc) {
+            console.warn('WARNING: project-string or filepath from session storage not acceptable');
             return
         }
         const project = Project.fromCSV(oldProjStr);
         project.brutto = parseFloat(inputValue);
-        sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
         renderBillCol(project);
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(projectLoc, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
     });
 
     $('#add-new-material-btn').onclick = () => {
