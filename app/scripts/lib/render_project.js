@@ -2,7 +2,7 @@ const { promises: fs } = require('fs');
 const { join } = require('path');
 const { Project } = require('./Project');
 const { delayEvent } = require('./utils');
-const { throwFatalErr } = require('../errors');
+const { throwFatalErr, throwErr } = require('../errors');
 
 async function renderProject(project) {
     if (!project) return;
@@ -109,7 +109,7 @@ function renderMatCol(project) {
 function renderWagesCol(project) {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
-    for (let data of project.hours) {
+    for (let [idx, data] of project.hours.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
@@ -117,11 +117,40 @@ function renderWagesCol(project) {
 
         td1.textContent = data.type + ' - ' + data.wage + '€';
         td2.textContent = data.amount;
+        const changeInput = document.createElement('input');
+        changeInput.type = 'number';
+        changeInput.value = '0';
+        changeInput.id = '' + idx; // used to refrence it in keyup event
+        td3.appendChild(changeInput);
 
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
         table.appendChild(tr);
+
+        changeInput.addEventListener('keyup', event => {
+            if (event.code !== 'Enter') return;
+            const newValue = parseFloat(event.target.value);
+            const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
+            const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+            if (!oldProjectLoc || !oldProjectStr) {
+                console.warn('WARNING: project string or filepath from session storage not acceptable');
+                return;
+            }
+            const project = Project.fromCSV(oldProjectStr);
+            const listID = parseInt(event.target.id);
+            project.hours[listID].amount += newValue;
+            if (project.hours[listID].amount < 0) {
+                throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
+                return;
+            };
+            renderWagesCol(project);
+            renderBillCol(project);
+            const newCSV = project.toCSV();
+            sessionStorage.setItem('CURRENT_PROJ', newCSV);
+            fs.writeFile(oldProjectLoc, newCSV)
+            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
+        });
     }
 }
 

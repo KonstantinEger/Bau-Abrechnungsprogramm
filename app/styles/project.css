@@ -73,13 +73,13 @@ span#project-name-display {
 
 /* For add-button in wages column */
 .column#wages-col > .col-body tr > td:nth-child(3) {
-    padding: 0px;
+    padding-left: 10px;
+    width: 27px;
 }
 
-.column#wages-col > .col-body tr > td button {
-    margin: 5px 25%;
-    height: 30px;
-    padding: 5px 13px;
+.column#wages-col > .col-body tr > td input[type="number"] {
+    width: 50px;
+    margin-left: 0px;
 }
 
 /* Column footer for materials and wages */

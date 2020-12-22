@@ -20,7 +20,7 @@ app.on('ready', () => {
         protocol: 'file:',
         slashes: true
     }));
-    
+
     const menu = Menu.buildFromTemplate([
         {
             label: 'Datei',
