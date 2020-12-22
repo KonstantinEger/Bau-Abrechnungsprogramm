@@ -55,6 +55,12 @@ app.on('ready', () => {
             label: 'Hilfe',
             submenu: [
                 {
+                    label: 'Docs',
+                    click() {
+                        electron.shell.openExternal('https://github.com/KonstantinEger/Bau-Abrechnungsprogramm/wiki');
+                    }
+                },
+                {
                     label: 'Projekt auf GitHub öffnen',
                     click() {
                         electron.shell.openExternal('https://github.com/KonstantinEger/Bau-Abrechnungsprogramm');
