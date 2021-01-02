@@ -1,3 +1,6 @@
+type Material = { name: string, receiptID: string, price: string };
+type Worker = { type: string, wage: number, amount: number };
+
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
  * @returns {string} ID
@@ -5,7 +8,7 @@
 function genID() {
     const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
 
-    return `${s5()}-${s5()}-${s5()}`;
+    return "" + s5() + "-" + s5() + "-" + s5();
 }
 
 /**
@@ -49,18 +52,16 @@ function splitCSVstring(str) {
     return arr;
 }
 
-class Project {
-    /**
-     * @param {string} id Project-ID
-     * @param {string} name Projectname
-     * @param {string} date Date of creation (by User input)
-     * @param {string} place
-     * @param {string} description Project description
-     * @param {number} brutto Brutto total
-     * @param {Array<{ name: string; receiptID: string; price: string }>} materials
-     * @param {Array<{ type: string; amount: number; wage: number }>} hours
-     * @param {boolean} generateID if an ID should be generated
-     */
+export class Project {
+	id: string;
+	name: string;
+	date: string;
+	place: string;
+	descr: string;
+	brutto: number;
+	materials: Material[];
+	hours: Worker[];
+
     constructor(name, date, place, description, brutto, materials = [], hours = [], generateID = true) {
         this.id = generateID ? genID() : '';
         this.name = name;
@@ -139,7 +140,3 @@ class Project {
         return project;
     }
 }
-
-module.exports = {
-    Project
-};

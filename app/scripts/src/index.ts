@@ -1,9 +1,9 @@
 const { promises: fs } = require('fs');
 const ipc = require('electron').ipcRenderer;
-const { Project } = require('./scripts/lib/Project');
-const { renderProject, ...renderPartials } = require('./scripts/lib/render_project');
-const openProjectDialog = require('./scripts/open_project_dialog');
-const { throwFatalErr } = require('./scripts/errors');
+import { Project } from './lib/Project';
+import * as renderFns from './lib/render_project';
+import { openProjectDialog } from './open_project_dialog';
+import { throwFatalErr } from './errors';
 
 (() => {
 
@@ -22,7 +22,7 @@ const { throwFatalErr } = require('./scripts/errors');
             project.id = data.project.id;
             sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
             sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
-            renderProject(project);
+            renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
@@ -43,8 +43,8 @@ const { throwFatalErr } = require('./scripts/errors');
             } catch (err) {
                 throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
             }
-            renderPartials.renderMatCol(project);
-            renderPartials.renderBillCol(project);
+            renderFns.renderMatCol(project);
+            renderFns.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
@@ -65,8 +65,8 @@ const { throwFatalErr } = require('./scripts/errors');
             } catch (err) {
                 throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
             }
-            renderPartials.renderWagesCol(project);
-            renderPartials.renderBillCol(project);
+            renderFns.renderWagesCol(project);
+            renderFns.renderBillCol(project);
         }
     };
 
@@ -91,7 +91,7 @@ const { throwFatalErr } = require('./scripts/errors');
     });
 
     document.querySelector('#btn-open').addEventListener('click', () => {
-        openProjectDialog().then(renderProject);
+        openProjectDialog().then(renderFns.renderProject);
     });
 })();
 
@@ -100,5 +100,5 @@ ipc.on('open:new-project-dialog', () => {
 });
 
 ipc.on('open:open-project-dialog', () => {
-    openProjectDialog().then(renderProject);
+    openProjectDialog().then(renderFns.renderProject);
 });

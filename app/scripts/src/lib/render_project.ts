@@ -1,16 +1,18 @@
 const { promises: fs } = require('fs');
 const { join } = require('path');
-const { Project } = require('./Project');
-const { delayEvent } = require('./utils');
-const { throwFatalErr, throwErr } = require('../errors');
+import { Project } from './Project';
+import { delayEvent } from './utils';
+import { throwFatalErr, throwErr } from '../errors';
+// @ts-expect-error
+import projectTemplate from '../../../project_template.html';
 
-async function renderProject(project) {
+export async function renderProject(project) {
     if (!project) return;
 
     document.body.innerHTML = '';
     document.title = 'Bau-Abrechnungen | Projekt | ' + project.name;
 
-    await loadCSSandHTML();
+    document.body.innerHTML = projectTemplate;
 
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
@@ -78,17 +80,7 @@ function $(selector) {
     return document.querySelector(selector);
 }
 
-async function loadCSSandHTML() {
-    const styleLink = document.createElement('link');
-    styleLink.rel = 'stylesheet';
-    styleLink.href = join(__dirname, '../../styles/project.css');
-    document.head.appendChild(styleLink);
-
-    const htmlSrcPath = join(__dirname, '../../project_template.html');
-    document.body.innerHTML = await fs.readFile(htmlSrcPath, 'utf8');
-}
-
-function renderMatCol(project) {
+export function renderMatCol(project) {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
     for (let mat of project.materials) {
@@ -106,7 +98,7 @@ function renderMatCol(project) {
     }
 }
 
-function renderWagesCol(project) {
+export function renderWagesCol(project) {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
     for (let [idx, data] of project.hours.entries()) {
@@ -129,8 +121,9 @@ function renderWagesCol(project) {
         table.appendChild(tr);
 
         changeInput.addEventListener('keyup', event => {
-            if (event.code !== 'Enter') return;
-            const newValue = parseFloat(event.target.value);
+			if (event.code !== 'Enter') return;
+			const eventTarget = event.target as HTMLInputElement;
+            const newValue = parseFloat(eventTarget.value);
             const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
             const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!oldProjectLoc || !oldProjectStr) {
@@ -138,7 +131,7 @@ function renderWagesCol(project) {
                 return;
             }
             const project = Project.fromCSV(oldProjectStr);
-            const listID = parseInt(event.target.id);
+            const listID = parseInt(eventTarget.id);
             project.hours[listID].amount += newValue;
             if (project.hours[listID].amount < 0) {
                 throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
@@ -154,7 +147,7 @@ function renderWagesCol(project) {
     }
 }
 
-function renderBillCol(project) {
+export function renderBillCol(project) {
     $('#brutto-bill-input').value = project.brutto;
     const mwst = 0.19;
     const netto = project.brutto - (project.brutto * mwst);
@@ -183,10 +176,3 @@ function calcExpenses(project) {
 function roundTo(num, decimals) {
     return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
-
-module.exports = {
-    renderProject,
-    renderWagesCol,
-    renderMatCol,
-    renderBillCol
-};

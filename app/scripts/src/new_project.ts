@@ -1,7 +1,7 @@
 const remote = require('@electron/remote');
 const { promises: fs } = require('fs');
-const { throwFatalErr, throwErr } = require('./scripts/errors');
-const { Project } = require('./scripts/lib/Project');
+import { throwErr, throwFatalErr } from './errors';
+import { Project } from './lib/Project';
 
 /**
  * When the new-btn is clicked
@@ -13,10 +13,10 @@ const { Project } = require('./scripts/lib/Project');
  *   and opened
  */
 document.getElementById('submit-btn').addEventListener('click', async () => {
-    const nameInput = document.getElementById('project-name-input');
-    const placeInput = document.getElementById('project-place-input');
-    const dateInput = document.getElementById('project-date-input');
-    const notesInput = document.getElementById('project-notes-input');
+    const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
+    const placeInput = document.getElementById('project-place-input') as HTMLInputElement;
+    const dateInput = document.getElementById('project-date-input') as HTMLInputElement;
+    const notesInput = document.getElementById('project-notes-input') as HTMLTextAreaElement;
     nameInput.classList.remove('invalid');
     placeInput.classList.remove('invalid');
     dateInput.classList.remove('invalid');

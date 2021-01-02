@@ -1,11 +1,11 @@
-const { throwErr } = require('./scripts/errors');
+import { throwErr } from './errors';
 
 document.getElementById('type-name-input').focus();
 
 document.getElementById('submit-btn').addEventListener('click', () => {
-    const typeInput = document.getElementById('type-name-input');
-    const wageInput = document.getElementById('wage-input');
-    const hoursInput = document.getElementById('hours-amount-input');
+    const typeInput = document.getElementById('type-name-input') as HTMLInputElement;
+    const wageInput = document.getElementById('wage-input') as HTMLInputElement;
+    const hoursInput = document.getElementById('hours-amount-input') as HTMLInputElement;
     typeInput.classList.remove('invalid');
     wageInput.classList.remove('invalid');
     hoursInput.classList.remove('invalid');

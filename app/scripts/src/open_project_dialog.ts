@@ -1,7 +1,7 @@
 const remote = require('@electron/remote');
 const { promises: fs } = require('fs');
-const { Project } = require('./lib/Project');
-const { throwFatalErr } = require('./errors');
+import { Project } from './lib/Project';
+import { throwFatalErr } from './errors';
 
 /**
  * When the open-btn is clicked:
@@ -10,7 +10,7 @@ const { throwFatalErr } = require('./errors');
  * [ ] parse string into Project instance
  * [ ] return project to open
  */
-async function openProjectDialog() {
+export async function openProjectDialog() {
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
 
@@ -39,5 +39,3 @@ async function openProjectDialog() {
     sessionStorage.setItem('CURRENT_PROJ_LOC', filePaths[0]);
     return Project.fromCSV(csvString);
 }
-
-module.exports = openProjectDialog;
