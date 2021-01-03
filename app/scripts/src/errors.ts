@@ -7,6 +7,6 @@ export function throwErr(title: string, content: string): void {
 
 export function throwFatalErr(title: string, content: string): never {
     dialog.showErrorBox(title, content);
-	ipc.send('quit-app');
-	throw new Error(content);
+    ipc.send('quit-app');
+    throw new Error(content);
 }

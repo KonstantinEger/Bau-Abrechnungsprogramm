@@ -72,11 +72,11 @@ export async function renderProject(project: Project): Promise<void> {
 }
 
 function $<T = HTMLElement>(selector: string): T {
-	const el = document.querySelector(selector) as T | null;
-	if (!el) {
-		throwFatalErr('Selector-Fehler', `Kann Element ${selector} nicht finden`);
-	}
-	return el;
+    const el = document.querySelector(selector) as T | null;
+    if (!el) {
+        throwFatalErr('Selector-Fehler', `Kann Element ${selector} nicht finden`);
+    }
+    return el;
 }
 
 export function renderMatCol(project: Project): void {
@@ -120,8 +120,8 @@ export function renderWagesCol(project: Project): void {
         table.appendChild(tr);
 
         changeInput.addEventListener('keyup', event => {
-			if (event.code !== 'Enter') return;
-			const eventTarget = event.target as HTMLInputElement;
+            if (event.code !== 'Enter') return;
+            const eventTarget = event.target as HTMLInputElement;
             const newValue = parseFloat(eventTarget.value);
             const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
             const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');

@@ -51,25 +51,25 @@ function splitCSVstring(str: string): string[] {
 }
 
 export class Project {
-	id: string;
-	name: string;
-	date: string;
-	place: string;
-	descr: string;
-	brutto: number;
-	materials: Material[];
-	hours: Worker[];
+    id: string;
+    name: string;
+    date: string;
+    place: string;
+    descr: string;
+    brutto: number;
+    materials: Material[];
+    hours: Worker[];
 
     constructor(
-		name: string,
-		date: string,
-		place: string,
-		description: string,
-		brutto: number,
-		materials: Material[] = [],
-		hours: Worker[] = [],
-		generateID = true
-	) {
+        name: string,
+        date: string,
+        place: string,
+        description: string,
+        brutto: number,
+        materials: Material[] = [],
+        hours: Worker[] = [],
+        generateID = true
+    ) {
         this.id = generateID ? genID() : '';
         this.name = name;
         this.date = date;
