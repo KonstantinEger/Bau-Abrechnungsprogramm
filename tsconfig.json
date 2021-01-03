@@ -16,6 +16,7 @@
         "downlevelIteration": true,
         "removeComments": true,
         "target": "ES2017",
-        "moduleResolution": "Node"
+        "moduleResolution": "Node",
+        "sourceMap": true
 	}
 }
