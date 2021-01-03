@@ -4,7 +4,8 @@ import html from 'rollup-plugin-html';
 const plugins = [
 	typescript({
 		removeComments: true,
-		target: 'ES2017'
+		target: 'ES2017',
+		downlevelIteration: true
 	}),
 	html({
 		include: '**/*.html',

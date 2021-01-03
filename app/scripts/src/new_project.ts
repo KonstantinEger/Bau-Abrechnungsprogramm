@@ -12,7 +12,7 @@ import { Project } from './lib/Project';
  * [x] new Project instance is sent to main window ("OPEN_PROJECT")
  *   and opened
  */
-document.getElementById('submit-btn').addEventListener('click', async () => {
+document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
     const placeInput = document.getElementById('project-place-input') as HTMLInputElement;
     const dateInput = document.getElementById('project-date-input') as HTMLInputElement;
@@ -86,4 +86,4 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     window.close();
 });
 
-document.getElementById('close-window-btn').addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

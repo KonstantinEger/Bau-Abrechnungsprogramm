@@ -2,6 +2,17 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": false,
-		"noEmit": true
+		"noEmit": true,
+		"strict": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"alwaysStrict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedParameters": true,
+		"downlevelIteration": true
 	}
 }

@@ -1,14 +1,22 @@
 const { promises: fs } = require('fs');
 const ipc = require('electron').ipcRenderer;
-import { Project } from './lib/Project';
+import { Project, Worker, Material } from './lib/Project';
 import * as renderFns from './lib/render_project';
 import { openProjectDialog } from './open_project_dialog';
 import { throwFatalErr } from './errors';
 
 (() => {
+	type MessageData = {
+		name: string,
+		project?: Project,
+		filePath?: string,
+		material?: Material,
+		worker?: Worker
+	}
 
-    window.onmessage = async ({ data }) => {
+    window.onmessage = async ({ data }: { data: MessageData }) => {
         if (data.name === 'OPEN_PROJECT') {
+			if (!data.project || !data.filePath) return;
             const project = new Project(
                 data.project.name,
                 data.project.date,
@@ -24,6 +32,7 @@ import { throwFatalErr } from './errors';
             sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
             renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
+			if (!data.material) return;
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!projectStr || !filePath) {
@@ -46,6 +55,7 @@ import { throwFatalErr } from './errors';
             renderFns.renderMatCol(project);
             renderFns.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
+			if (!data.worker) return;
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!projectStr || !filePath) {
@@ -86,12 +96,15 @@ import { throwFatalErr } from './errors';
         }
     });
 
-    document.querySelector('#btn-new').addEventListener('click', () => {
+    document.querySelector('#btn-new')?.addEventListener('click', () => {
         window.open('./new_project.html', '_blank', 'width=800,height=600');
     });
 
-    document.querySelector('#btn-open').addEventListener('click', () => {
-        openProjectDialog().then(renderFns.renderProject);
+    document.querySelector('#btn-open')?.addEventListener('click', () => {
+        openProjectDialog().then(proj => {
+			if (!proj) return;
+			renderFns.renderProject(proj);
+		});
     });
 })();
 
@@ -100,5 +113,8 @@ ipc.on('open:new-project-dialog', () => {
 });
 
 ipc.on('open:open-project-dialog', () => {
-    openProjectDialog().then(renderFns.renderProject);
+    openProjectDialog().then(proj => {
+		if (!proj) return;
+		renderFns.renderProject(proj);
+	});
 });

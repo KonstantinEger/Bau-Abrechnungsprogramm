@@ -1,8 +1,8 @@
 import { throwErr } from './errors';
 
-document.getElementById('mat-name-input').focus();
+document.getElementById('mat-name-input')?.focus();
 
-document.getElementById('submit-btn').addEventListener('click', () => {
+document.getElementById('submit-btn')?.addEventListener('click', () => {
     const nameInput = document.getElementById('mat-name-input') as HTMLInputElement;
     const receiptIdInput = document.getElementById('receipt-id-input') as HTMLInputElement;
     const priceInput = document.getElementById('price-input') as HTMLInputElement;
@@ -45,4 +45,4 @@ document.getElementById('submit-btn').addEventListener('click', () => {
     window.close();
 });
 
-document.getElementById('close-window-btn').addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

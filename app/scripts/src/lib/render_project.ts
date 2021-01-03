@@ -6,7 +6,7 @@ import { throwFatalErr, throwErr } from '../errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
 
-export async function renderProject(project) {
+export async function renderProject(project: Project): Promise<void> {
     if (!project) return;
 
     document.body.innerHTML = '';
@@ -17,16 +17,16 @@ export async function renderProject(project) {
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
     $('#project-date-display').textContent = project.date;
-    $('#notes-input').value = project.descr
-        .replaceAll('{{c}}', ',')
-        .replaceAll('{{dq}}', '"');
+    $<HTMLTextAreaElement>('#notes-input').value = project.descr
+        .replace(/{{c}}/g, ',')
+        .replace(/{{dq}}/g, '"');
 
     renderMatCol(project);
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = delayEvent(750, async (event) => {
-        const inputValue = event.target.value;
+    $('#brutto-bill-input').oninput = delayEvent(750, async (event: InputEvent) => {
+        const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
@@ -44,10 +44,10 @@ export async function renderProject(project) {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    });
+    }) as (this: GlobalEventHandlers, ev: Event) => any;
 
-    $('#notes-input').oninput = delayEvent(750, async (event) => {
-        const inputValue = event.target.value;
+    $('#notes-input').oninput = delayEvent(750, async (event: InputEvent) => {
+        const inputValue = (event.target as HTMLTextAreaElement).value;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
         if (!oldProjStr || !projectLoc) {
@@ -56,8 +56,8 @@ export async function renderProject(project) {
         }
         const project = Project.fromCSV(oldProjStr);
         project.descr = inputValue
-            .replaceAll(',', '{{c}}')
-            .replaceAll('"', '{{dq}}');
+            .replace(/,/g, '{{c}}')
+            .replace(/"/g, '{{dq}}');
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
@@ -65,7 +65,7 @@ export async function renderProject(project) {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    });
+    }) as (this: GlobalEventHandlers, ev: Event) => any;
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
@@ -76,11 +76,15 @@ export async function renderProject(project) {
     }
 }
 
-function $(selector) {
-    return document.querySelector(selector);
+function $<T = HTMLElement>(selector: string): T {
+	const el = document.querySelector(selector) as T | null;
+	if (!el) {
+		throwFatalErr('Selector-Fehler', `Kann Element ${selector} nicht finden`);
+	}
+	return el;
 }
 
-export function renderMatCol(project) {
+export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
     for (let mat of project.materials) {
@@ -98,7 +102,7 @@ export function renderMatCol(project) {
     }
 }
 
-export function renderWagesCol(project) {
+export function renderWagesCol(project: Project): void {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
     for (let [idx, data] of project.hours.entries()) {
@@ -108,7 +112,7 @@ export function renderWagesCol(project) {
         const td3 = document.createElement('td');
 
         td1.textContent = data.type + ' - ' + data.wage + '€';
-        td2.textContent = data.amount;
+        td2.textContent = data.amount.toString();
         const changeInput = document.createElement('input');
         changeInput.type = 'number';
         changeInput.value = '0';
@@ -147,8 +151,8 @@ export function renderWagesCol(project) {
     }
 }
 
-export function renderBillCol(project) {
-    $('#brutto-bill-input').value = project.brutto;
+export function renderBillCol(project: Project): void {
+    $<HTMLInputElement>('#brutto-bill-input').value = project.brutto.toString();
     const mwst = 0.19;
     const netto = project.brutto - (project.brutto * mwst);
     $('#netto-bill-display').textContent = roundTo(netto, 2) + '€';
@@ -167,12 +171,12 @@ export function renderBillCol(project) {
     else bilanzDisp.classList.remove('negative');
 }
 
-function calcExpenses(project) {
+function calcExpenses(project: Project): [number, number] {
     let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
     let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
     return [matExps, wagesExps];
 }
 
-function roundTo(num, decimals) {
+function roundTo(num: number, decimals: number): number {
     return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
