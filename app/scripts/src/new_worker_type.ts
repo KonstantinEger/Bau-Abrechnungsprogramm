@@ -1,4 +1,5 @@
 import { throwErr } from './errors';
+import { isInvalid } from './lib/utils';
 
 document.getElementById('type-name-input')?.focus();
 
@@ -12,7 +13,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
 
     {
         let exitDueToError = false;
-        if (typeInput.value.length === 0) {
+        if (typeInput.value.length === 0 || isInvalid(typeInput.value)) {
             typeInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -28,7 +29,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
         }
 
         if (exitDueToError) {
-            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein (kein , oder ")');
             return;
         }
     }

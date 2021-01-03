@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { Project } from './Project';
-import { delayEvent } from './utils';
+import { delayEvent, desanitize, sanitize } from './utils';
 import { throwFatalErr, throwErr } from '../errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
@@ -16,9 +16,7 @@ export async function renderProject(project: Project): Promise<void> {
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
     $('#project-date-display').textContent = project.date;
-    $<HTMLTextAreaElement>('#notes-input').value = project.descr
-        .replace(/{{c}}/g, ',')
-        .replace(/{{dq}}/g, '"');
+    $<HTMLTextAreaElement>('#notes-input').value = desanitize(project.descr);
 
     renderMatCol(project);
     renderWagesCol(project);
@@ -54,9 +52,7 @@ export async function renderProject(project: Project): Promise<void> {
             return;
         }
         const project = Project.fromCSV(oldProjStr);
-        project.descr = inputValue
-            .replace(/,/g, '{{c}}')
-            .replace(/"/g, '{{dq}}');
+        project.descr = sanitize(inputValue);
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {

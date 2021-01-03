@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './lib/Project';
+import { isInvalid, sanitize } from './lib/utils';
 
 /**
  * When the new-btn is clicked
@@ -24,12 +25,12 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     // input validation
     {
         let exitDueToError = false;
-        if (nameInput.value.length === 0) {
+        if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
             nameInput.classList.add('invalid');
             exitDueToError = true;
         }
 
-        if (placeInput.value.length === 0) {
+        if (placeInput.value.length === 0 || isInvalid(placeInput.value)) {
             placeInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -40,7 +41,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         }
 
         if (exitDueToError) {
-            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein (kein , oder ")');
             return;
         }
     }
@@ -65,7 +66,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         nameInput.value,
         dateInput.value,
         placeInput.value,
-        notesInput.value,
+        sanitize(notesInput.value),
         0,
         [],
         []

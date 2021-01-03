@@ -1,4 +1,5 @@
 import { throwErr } from './errors';
+import { isInvalid } from './lib/utils';
 
 document.getElementById('mat-name-input')?.focus();
 
@@ -12,12 +13,12 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
 
     {
         let exitDueToError = false;
-        if (nameInput.value.length === 0) {
+        if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
             nameInput.classList.add('invalid');
             exitDueToError = true;
         }
 
-        if (receiptIdInput.value.length === 0) {
+        if (receiptIdInput.value.length === 0 || isInvalid(receiptIdInput.value)) {
             receiptIdInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -28,7 +29,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
         }
 
         if (exitDueToError) {
-            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein (kein , oder ")');
             return;
         }
     }
