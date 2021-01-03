@@ -1,5 +1,5 @@
-const { promises: fs } = require('fs');
-const ipc = require('electron').ipcRenderer;
+import { promises as fs } from 'fs';
+import { ipcRenderer as ipc } from 'electron';
 import { Project, Worker, Material } from './lib/Project';
 import * as renderFns from './lib/render_project';
 import { openProjectDialog } from './open_project_dialog';

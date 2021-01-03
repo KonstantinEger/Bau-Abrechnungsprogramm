@@ -1,5 +1,4 @@
-const { promises: fs } = require('fs');
-const { join } = require('path');
+import { promises as fs } from 'fs';
 import { Project } from './Project';
 import { delayEvent } from './utils';
 import { throwFatalErr, throwErr } from '../errors';

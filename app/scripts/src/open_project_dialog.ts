@@ -1,5 +1,5 @@
-const remote = require('@electron/remote');
-const { promises: fs } = require('fs');
+import { promises as fs } from 'fs';
+import * as remote from '@electron/remote';
 import { Project } from './lib/Project';
 import { throwFatalErr } from './errors';
 
@@ -14,7 +14,7 @@ export async function openProjectDialog() {
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
 
-    let opts = {
+    let opts: remote.OpenDialogOpts = {
         title: 'Bauprojekt öffnen',
         defaultPath: process.env.HOME || process.env.HOMEPATH,
         buttonLabel: 'Öffnen',

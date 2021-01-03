@@ -1,5 +1,5 @@
-const { dialog } = require('@electron/remote');
-const ipc = require('electron').ipcRenderer;
+import { dialog } from '@electron/remote';
+import { ipcRenderer as ipc } from 'electron';
 
 export function throwErr(title: string, content: string): void {
     dialog.showErrorBox(title, content);

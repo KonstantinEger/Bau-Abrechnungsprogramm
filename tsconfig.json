@@ -13,6 +13,9 @@
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"noUnusedParameters": true,
-		"downlevelIteration": true
+        "downlevelIteration": true,
+        "removeComments": true,
+        "target": "ES2017",
+        "moduleResolution": "Node"
 	}
 }

@@ -1,5 +1,5 @@
-const remote = require('@electron/remote');
-const { promises: fs } = require('fs');
+import { promises as fs } from 'fs';
+import * as remote from '@electron/remote';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './lib/Project';
 
