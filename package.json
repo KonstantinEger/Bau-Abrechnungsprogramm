@@ -5,7 +5,8 @@
     "main": "main.js",
     "scripts": {
         "build-rollup": "rollup --config",
-        "start": "electron ."
+        "start": "electron .",
+        "build-win": "electron-packager ./ TBVAbrechnung --out ./dist/ --platform=win32 --icon=./app/assets/logo.ico"
     },
     "repository": {
         "type": "git",
@@ -18,11 +19,12 @@
     },
     "homepage": "https://github.com/KonstantinEger/Bau-Abrechnungsprogramm#readme",
     "dependencies": {
-        "@electron/remote": "^1.0.2",
-        "electron": "^11.1.0"
+        "@electron/remote": "^1.0.2"
     },
     "devDependencies": {
+        "electron": "^11.1.0",
         "@rollup/plugin-typescript": "^8.1.0",
+        "electron-packager": "^15.2.0",
         "rollup": "^2.35.1",
         "rollup-plugin-html": "^0.2.1",
         "tslib": "^2.0.3",
