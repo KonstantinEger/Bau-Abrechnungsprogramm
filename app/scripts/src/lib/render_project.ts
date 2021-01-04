@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { Project } from './Project';
 import { delayEvent, desanitize, sanitize } from './utils';
-import { throwFatalErr, throwErr } from '../errors';
+import { throwFatalErr, throwErr } from './errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
 

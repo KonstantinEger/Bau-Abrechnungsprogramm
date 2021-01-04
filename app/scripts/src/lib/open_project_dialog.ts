@@ -1,14 +1,14 @@
 import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
-import { Project } from './lib/Project';
+import { Project } from './Project';
 import { throwFatalErr } from './errors';
 
 /**
  * When the open-btn is clicked:
  * [x] open "open file" dialog
  * [x] read file at user specified location
- * [ ] parse string into Project instance
- * [ ] return project to open
+ * [x] parse string into Project instance
+ * [x] return project to open
  */
 export async function openProjectDialog() {
     const dialog = remote.dialog;

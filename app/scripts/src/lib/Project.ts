@@ -1,9 +1,5 @@
-export type Material = { name: string, receiptID: string, price: string };
-export type Worker = { type: string, wage: number, amount: number };
-
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
- * @returns {string} ID
  */
 function genID(): string {
     const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
@@ -50,6 +46,9 @@ function splitCSVstring(str: string): string[] {
     return arr;
 }
 
+export type Material = { name: string, receiptID: string, price: string };
+export type Worker = { type: string, wage: number, amount: number };
+
 export class Project {
     id: string;
     name: string;
@@ -83,7 +82,6 @@ export class Project {
     /**
      * Creates a string with the Project info in CSV format
      * for saving it to disk.
-     * @returns {string} String in CSV format
      */
     toCSV(): string {
         // --- values will be skipped when parsing the csv back into a Project
@@ -118,8 +116,6 @@ export class Project {
      * Parses a string e.g. read from a CSV file into a new
      * Project instance. **Note** If parsing fails, undefined is
      * returned.
-     * @param {string} source Source string read from CSV file
-     * @returns {Project} new Project
      */
     static fromCSV(source: string): Project {
         const data = splitCSVstring(source).slice(12);

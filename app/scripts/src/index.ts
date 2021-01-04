@@ -2,8 +2,8 @@ import { promises as fs } from 'fs';
 import { ipcRenderer as ipc } from 'electron';
 import { Project, Worker, Material } from './lib/Project';
 import * as renderFns from './lib/render_project';
-import { openProjectDialog } from './open_project_dialog';
-import { throwFatalErr } from './errors';
+import { openProjectDialog } from './lib/open_project_dialog';
+import { throwFatalErr } from './lib/errors';
 
 (() => {
     type MessageData = {
