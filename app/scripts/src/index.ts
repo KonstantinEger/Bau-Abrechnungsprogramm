@@ -1,14 +1,22 @@
-const { promises: fs } = require('fs');
-const ipc = require('electron').ipcRenderer;
-const { Project } = require('./scripts/lib/Project');
-const { renderProject, ...renderPartials } = require('./scripts/lib/render_project');
-const openProjectDialog = require('./scripts/open_project_dialog');
-const { throwFatalErr } = require('./scripts/errors');
+import { promises as fs } from 'fs';
+import { ipcRenderer as ipc } from 'electron';
+import { Project, Worker, Material } from './lib/Project';
+import * as renderFns from './lib/render_project';
+import { openProjectDialog } from './lib/open_project_dialog';
+import { throwFatalErr } from './lib/errors';
 
 (() => {
+    type MessageData = {
+        name: string,
+        project?: Project,
+        filePath?: string,
+        material?: Material,
+        worker?: Worker
+    }
 
-    window.onmessage = async ({ data }) => {
+    window.onmessage = async ({ data }: { data: MessageData }) => {
         if (data.name === 'OPEN_PROJECT') {
+            if (!data.project || !data.filePath) return;
             const project = new Project(
                 data.project.name,
                 data.project.date,
@@ -22,8 +30,9 @@ const { throwFatalErr } = require('./scripts/errors');
             project.id = data.project.id;
             sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
             sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
-            renderProject(project);
+            renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
+            if (!data.material) return;
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!projectStr || !filePath) {
@@ -43,9 +52,10 @@ const { throwFatalErr } = require('./scripts/errors');
             } catch (err) {
                 throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
             }
-            renderPartials.renderMatCol(project);
-            renderPartials.renderBillCol(project);
+            renderFns.renderMatCol(project);
+            renderFns.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
+            if (!data.worker) return;
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!projectStr || !filePath) {
@@ -65,8 +75,8 @@ const { throwFatalErr } = require('./scripts/errors');
             } catch (err) {
                 throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
             }
-            renderPartials.renderWagesCol(project);
-            renderPartials.renderBillCol(project);
+            renderFns.renderWagesCol(project);
+            renderFns.renderBillCol(project);
         }
     };
 
@@ -86,12 +96,15 @@ const { throwFatalErr } = require('./scripts/errors');
         }
     });
 
-    document.querySelector('#btn-new').addEventListener('click', () => {
+    document.querySelector('#btn-new')?.addEventListener('click', () => {
         window.open('./new_project.html', '_blank', 'width=800,height=600');
     });
 
-    document.querySelector('#btn-open').addEventListener('click', () => {
-        openProjectDialog().then(renderProject);
+    document.querySelector('#btn-open')?.addEventListener('click', () => {
+        openProjectDialog().then(proj => {
+            if (!proj) return;
+            renderFns.renderProject(proj);
+        });
     });
 })();
 
@@ -100,5 +113,8 @@ ipc.on('open:new-project-dialog', () => {
 });
 
 ipc.on('open:open-project-dialog', () => {
-    openProjectDialog().then(renderProject);
+    openProjectDialog().then(proj => {
+        if (!proj) return;
+        renderFns.renderProject(proj);
+    });
 });

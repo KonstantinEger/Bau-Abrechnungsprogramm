@@ -1,11 +1,10 @@
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
- * @returns {string} ID
  */
-function genID() {
+function genID(): string {
     const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
 
-    return `${s5()}-${s5()}-${s5()}`;
+    return "" + s5() + "-" + s5() + "-" + s5();
 }
 
 /**
@@ -38,10 +37,8 @@ function genID() {
  * ### Source
  * Shamelessly ripped of the internet. Original by [martinp999](https://stackoverflow.com/users/580772/martinp999)
  * from a comment to [this answer](https://stackoverflow.com/a/11457952) on stack overflow.
- * @param {string} str input string
- * @returns {Array<string>} output string array
  */
-function splitCSVstring(str) {
+function splitCSVstring(str: string): string[] {
     let regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
     let arr = [];
     let res;
@@ -49,19 +46,29 @@ function splitCSVstring(str) {
     return arr;
 }
 
-class Project {
-    /**
-     * @param {string} id Project-ID
-     * @param {string} name Projectname
-     * @param {string} date Date of creation (by User input)
-     * @param {string} place
-     * @param {string} description Project description
-     * @param {number} brutto Brutto total
-     * @param {Array<{ name: string; receiptID: string; price: string }>} materials
-     * @param {Array<{ type: string; amount: number; wage: number }>} hours
-     * @param {boolean} generateID if an ID should be generated
-     */
-    constructor(name, date, place, description, brutto, materials = [], hours = [], generateID = true) {
+export type Material = { name: string, receiptID: string, price: string };
+export type Worker = { type: string, wage: number, amount: number };
+
+export class Project {
+    id: string;
+    name: string;
+    date: string;
+    place: string;
+    descr: string;
+    brutto: number;
+    materials: Material[];
+    hours: Worker[];
+
+    constructor(
+        name: string,
+        date: string,
+        place: string,
+        description: string,
+        brutto: number,
+        materials: Material[] = [],
+        hours: Worker[] = [],
+        generateID = true
+    ) {
         this.id = generateID ? genID() : '';
         this.name = name;
         this.date = date;
@@ -72,12 +79,8 @@ class Project {
         this.hours = hours;
     }
 
-    /**
-     * Creates a string with the Project info in CSV format
-     * for saving it to disk.
-     * @returns {string} String in CSV format
-     */
-    toCSV() {
+    /** Creates a string with the Project info in CSV format. */
+    toCSV(): string {
         // --- values will be skipped when parsing the csv back into a Project
         // filling the last 5 cells with --- now makes for an easier logic to
         // create the CSV string. Its also necessary for the splitCSVstring
@@ -107,13 +110,10 @@ class Project {
     }
 
     /**
-     * Parses a string e.g. read from a CSV file into a new
-     * Project instance. **Note** If parsing fails, undefined is
-     * returned.
-     * @param {string} source Source string read from CSV file
-     * @returns {Project | undefined} new Project
+     * Parses a string (e.g. read from a CSV file) into a new
+     * Project instance.
      */
-    static fromCSV(source) {
+    static fromCSV(source: string): Project {
         const data = splitCSVstring(source).slice(12);
         const project = new Project(data[1], data[2], data[3], data[4], parseFloat(data[5]), [], [], false);
         project.id = data[0];
@@ -139,7 +139,3 @@ class Project {
         return project;
     }
 }
-
-module.exports = {
-    Project
-};

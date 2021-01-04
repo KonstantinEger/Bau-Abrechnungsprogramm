@@ -1,20 +1,17 @@
-const remote = require('@electron/remote');
-const { promises: fs } = require('fs');
-const { Project } = require('./lib/Project');
-const { throwFatalErr } = require('./errors');
+import { promises as fs } from 'fs';
+import * as remote from '@electron/remote';
+import { Project } from './Project';
+import { throwFatalErr } from './errors';
 
 /**
- * When the open-btn is clicked:
- * [x] open "open file" dialog
- * [x] read file at user specified location
- * [ ] parse string into Project instance
- * [ ] return project to open
+ * Opens a dialog window where the user selects a file to be loaded as a
+ * project, which is then parsed and returned as a new instance.
  */
-async function openProjectDialog() {
+export async function openProjectDialog() {
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
 
-    let opts = {
+    let opts: remote.OpenDialogOpts = {
         title: 'Bauprojekt öffnen',
         defaultPath: process.env.HOME || process.env.HOMEPATH,
         buttonLabel: 'Öffnen',
@@ -39,5 +36,3 @@ async function openProjectDialog() {
     sessionStorage.setItem('CURRENT_PROJ_LOC', filePaths[0]);
     return Project.fromCSV(csvString);
 }
-
-module.exports = openProjectDialog;

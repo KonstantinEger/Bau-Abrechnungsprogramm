@@ -1,30 +1,33 @@
-const { promises: fs } = require('fs');
-const { join } = require('path');
-const { Project } = require('./Project');
-const { delayEvent } = require('./utils');
-const { throwFatalErr, throwErr } = require('../errors');
+import { promises as fs } from 'fs';
+import { Project } from './Project';
+import { delayEvent, desanitize, sanitize } from './utils';
+import { throwFatalErr, throwErr } from './errors';
+// @ts-expect-error
+import projectTemplate from '../../../project_template.html';
 
-async function renderProject(project) {
+/**
+ * Renders the **full** project view, meaning header, material-, worker-
+ * and bill column. Event listeners for inputs are also setup here.
+ */
+export async function renderProject(project: Project): Promise<void> {
     if (!project) return;
 
     document.body.innerHTML = '';
     document.title = 'Bau-Abrechnungen | Projekt | ' + project.name;
 
-    await loadCSSandHTML();
+    document.body.innerHTML = projectTemplate;
 
     $('#project-name-display').textContent = project.name;
     $('#project-place-display').textContent = project.place;
     $('#project-date-display').textContent = project.date;
-    $('#notes-input').value = project.descr
-        .replaceAll('{{c}}', ',')
-        .replaceAll('{{dq}}', '"');
+    $<HTMLTextAreaElement>('#notes-input').value = desanitize(project.descr);
 
     renderMatCol(project);
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = delayEvent(750, async (event) => {
-        const inputValue = event.target.value;
+    $('#brutto-bill-input').oninput = delayEvent(750, async (event: InputEvent) => {
+        const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
@@ -42,10 +45,10 @@ async function renderProject(project) {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    });
+    }) as (this: GlobalEventHandlers, ev: Event) => any;
 
-    $('#notes-input').oninput = delayEvent(750, async (event) => {
-        const inputValue = event.target.value;
+    $('#notes-input').oninput = delayEvent(750, async (event: InputEvent) => {
+        const inputValue = (event.target as HTMLTextAreaElement).value;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
         if (!oldProjStr || !projectLoc) {
@@ -53,9 +56,7 @@ async function renderProject(project) {
             return;
         }
         const project = Project.fromCSV(oldProjStr);
-        project.descr = inputValue
-            .replaceAll(',', '{{c}}')
-            .replaceAll('"', '{{dq}}');
+        project.descr = sanitize(inputValue);
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
@@ -63,7 +64,7 @@ async function renderProject(project) {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    });
+    }) as (this: GlobalEventHandlers, ev: Event) => any;
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
@@ -74,21 +75,17 @@ async function renderProject(project) {
     }
 }
 
-function $(selector) {
-    return document.querySelector(selector);
+/** Select a Element (shortcut for document.querySelector) and throws if none found. */
+function $<T = HTMLElement>(selector: string): T {
+    const el = document.querySelector(selector) as T | null;
+    if (!el) {
+        throwFatalErr('Selector-Fehler', `Kann Element ${selector} nicht finden`);
+    }
+    return el;
 }
 
-async function loadCSSandHTML() {
-    const styleLink = document.createElement('link');
-    styleLink.rel = 'stylesheet';
-    styleLink.href = join(__dirname, '../../styles/project.css');
-    document.head.appendChild(styleLink);
-
-    const htmlSrcPath = join(__dirname, '../../project_template.html');
-    document.body.innerHTML = await fs.readFile(htmlSrcPath, 'utf8');
-}
-
-function renderMatCol(project) {
+/** Renders **only** the materials table. (no footer) */
+export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
     for (let mat of project.materials) {
@@ -106,7 +103,8 @@ function renderMatCol(project) {
     }
 }
 
-function renderWagesCol(project) {
+/** Renders **only** the worker table with event listeners. (no footer) */
+export function renderWagesCol(project: Project): void {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
     for (let [idx, data] of project.hours.entries()) {
@@ -116,7 +114,7 @@ function renderWagesCol(project) {
         const td3 = document.createElement('td');
 
         td1.textContent = data.type + ' - ' + data.wage + '€';
-        td2.textContent = data.amount;
+        td2.textContent = data.amount.toString();
         const changeInput = document.createElement('input');
         changeInput.type = 'number';
         changeInput.value = '0';
@@ -130,7 +128,8 @@ function renderWagesCol(project) {
 
         changeInput.addEventListener('keyup', event => {
             if (event.code !== 'Enter') return;
-            const newValue = parseFloat(event.target.value);
+            const eventTarget = event.target as HTMLInputElement;
+            const newValue = parseFloat(eventTarget.value);
             const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
             const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!oldProjectLoc || !oldProjectStr) {
@@ -138,7 +137,7 @@ function renderWagesCol(project) {
                 return;
             }
             const project = Project.fromCSV(oldProjectStr);
-            const listID = parseInt(event.target.id);
+            const listID = parseInt(eventTarget.id);
             project.hours[listID].amount += newValue;
             if (project.hours[listID].amount < 0) {
                 throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
@@ -154,8 +153,12 @@ function renderWagesCol(project) {
     }
 }
 
-function renderBillCol(project) {
-    $('#brutto-bill-input').value = project.brutto;
+/**
+ * Renders the bill column **and** the footers for the material and worker cols
+ * because with this all calculations with money are concentrated here.
+ */
+export function renderBillCol(project: Project): void {
+    $<HTMLInputElement>('#brutto-bill-input').value = project.brutto.toString();
     const mwst = 0.19;
     const netto = project.brutto - (project.brutto * mwst);
     $('#netto-bill-display').textContent = roundTo(netto, 2) + '€';
@@ -174,19 +177,14 @@ function renderBillCol(project) {
     else bilanzDisp.classList.remove('negative');
 }
 
-function calcExpenses(project) {
+/** Sums up all expenses of a `Project` */
+function calcExpenses(project: Project): [number, number] {
     let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
     let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
     return [matExps, wagesExps];
 }
 
-function roundTo(num, decimals) {
+/** Rounds numbers to a specific amount of decimal places. */
+function roundTo(num: number, decimals: number): number {
     return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }
-
-module.exports = {
-    renderProject,
-    renderWagesCol,
-    renderMatCol,
-    renderBillCol
-};

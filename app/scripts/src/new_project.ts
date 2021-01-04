@@ -1,22 +1,14 @@
-const remote = require('@electron/remote');
-const { promises: fs } = require('fs');
-const { throwFatalErr, throwErr } = require('./scripts/errors');
-const { Project } = require('./scripts/lib/Project');
+import { promises as fs } from 'fs';
+import * as remote from '@electron/remote';
+import { throwErr, throwFatalErr } from './lib/errors';
+import { Project } from './lib/Project';
+import { isInvalid, sanitize } from './lib/utils';
 
-/**
- * When the new-btn is clicked
- * [x] open a new BrowserWindow where the user can input
- *   relevant data for the project
- * [x] this fn is called when input is done
- * [x] input is validated
- * [x] new Project instance is sent to main window ("OPEN_PROJECT")
- *   and opened
- */
-document.getElementById('submit-btn').addEventListener('click', async () => {
-    const nameInput = document.getElementById('project-name-input');
-    const placeInput = document.getElementById('project-place-input');
-    const dateInput = document.getElementById('project-date-input');
-    const notesInput = document.getElementById('project-notes-input');
+document.getElementById('submit-btn')?.addEventListener('click', async () => {
+    const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
+    const placeInput = document.getElementById('project-place-input') as HTMLInputElement;
+    const dateInput = document.getElementById('project-date-input') as HTMLInputElement;
+    const notesInput = document.getElementById('project-notes-input') as HTMLTextAreaElement;
     nameInput.classList.remove('invalid');
     placeInput.classList.remove('invalid');
     dateInput.classList.remove('invalid');
@@ -24,12 +16,12 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     // input validation
     {
         let exitDueToError = false;
-        if (nameInput.value.length === 0) {
+        if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
             nameInput.classList.add('invalid');
             exitDueToError = true;
         }
 
-        if (placeInput.value.length === 0) {
+        if (placeInput.value.length === 0 || isInvalid(placeInput.value)) {
             placeInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -40,7 +32,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         }
 
         if (exitDueToError) {
-            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein (kein , oder ")');
             return;
         }
     }
@@ -65,7 +57,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
         nameInput.value,
         dateInput.value,
         placeInput.value,
-        notesInput.value,
+        sanitize(notesInput.value),
         0,
         [],
         []
@@ -86,4 +78,4 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
     window.close();
 });
 
-document.getElementById('close-window-btn').addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

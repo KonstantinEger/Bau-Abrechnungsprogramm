@@ -1,18 +1,19 @@
-const { throwErr } = require('./scripts/errors');
+import { throwErr } from './lib/errors';
+import { isInvalid } from './lib/utils';
 
-document.getElementById('type-name-input').focus();
+document.getElementById('type-name-input')?.focus();
 
-document.getElementById('submit-btn').addEventListener('click', () => {
-    const typeInput = document.getElementById('type-name-input');
-    const wageInput = document.getElementById('wage-input');
-    const hoursInput = document.getElementById('hours-amount-input');
+document.getElementById('submit-btn')?.addEventListener('click', () => {
+    const typeInput = document.getElementById('type-name-input') as HTMLInputElement;
+    const wageInput = document.getElementById('wage-input') as HTMLInputElement;
+    const hoursInput = document.getElementById('hours-amount-input') as HTMLInputElement;
     typeInput.classList.remove('invalid');
     wageInput.classList.remove('invalid');
     hoursInput.classList.remove('invalid');
 
     {
         let exitDueToError = false;
-        if (typeInput.value.length === 0) {
+        if (typeInput.value.length === 0 || isInvalid(typeInput.value)) {
             typeInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -28,7 +29,7 @@ document.getElementById('submit-btn').addEventListener('click', () => {
         }
 
         if (exitDueToError) {
-            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein');
+            throwErr('Eingabefehler', 'Alle Felder mit einem roten * müssen richtig ausgefüllt sein (kein , oder ")');
             return;
         }
     }
@@ -45,4 +46,4 @@ document.getElementById('submit-btn').addEventListener('click', () => {
     window.close();
 });
 
-document.getElementById('close-window-btn').addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

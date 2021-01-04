@@ -65,6 +65,12 @@ app.on('ready', () => {
                     click() {
                         electron.shell.openExternal('https://github.com/KonstantinEger/Bau-Abrechnungsprogramm');
                     }
+                },
+                {
+                    label: 'DevTools',
+                    click() {
+                        mainWindow.webContents.openDevTools();
+                    }
                 }
             ]
         }
