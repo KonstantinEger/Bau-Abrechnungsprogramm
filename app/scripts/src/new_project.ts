@@ -4,15 +4,6 @@ import { throwErr, throwFatalErr } from './lib/errors';
 import { Project } from './lib/Project';
 import { isInvalid, sanitize } from './lib/utils';
 
-/**
- * When the new-btn is clicked
- * [x] open a new BrowserWindow where the user can input
- *   relevant data for the project
- * [x] this fn is called when input is done
- * [x] input is validated
- * [x] new Project instance is sent to main window ("OPEN_PROJECT")
- *   and opened
- */
 document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
     const placeInput = document.getElementById('project-place-input') as HTMLInputElement;

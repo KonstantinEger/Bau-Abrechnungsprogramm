@@ -5,6 +5,10 @@ import { throwFatalErr, throwErr } from './errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
 
+/**
+ * Renders the **full** project view, meaning header, material-, worker-
+ * and bill column. Event listeners for inputs are also setup here.
+ */
 export async function renderProject(project: Project): Promise<void> {
     if (!project) return;
 
@@ -71,6 +75,7 @@ export async function renderProject(project: Project): Promise<void> {
     }
 }
 
+/** Select a Element (shortcut for document.querySelector) and throws if none found. */
 function $<T = HTMLElement>(selector: string): T {
     const el = document.querySelector(selector) as T | null;
     if (!el) {
@@ -79,6 +84,7 @@ function $<T = HTMLElement>(selector: string): T {
     return el;
 }
 
+/** Renders **only** the materials table. (no footer) */
 export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
@@ -97,6 +103,7 @@ export function renderMatCol(project: Project): void {
     }
 }
 
+/** Renders **only** the worker table with event listeners. (no footer) */
 export function renderWagesCol(project: Project): void {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
@@ -146,6 +153,10 @@ export function renderWagesCol(project: Project): void {
     }
 }
 
+/**
+ * Renders the bill column **and** the footers for the material and worker cols
+ * because with this all calculations with money are concentrated here.
+ */
 export function renderBillCol(project: Project): void {
     $<HTMLInputElement>('#brutto-bill-input').value = project.brutto.toString();
     const mwst = 0.19;
@@ -166,12 +177,14 @@ export function renderBillCol(project: Project): void {
     else bilanzDisp.classList.remove('negative');
 }
 
+/** Sums up all expenses of a `Project` */
 function calcExpenses(project: Project): [number, number] {
     let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
     let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
     return [matExps, wagesExps];
 }
 
+/** Rounds numbers to a specific amount of decimal places. */
 function roundTo(num: number, decimals: number): number {
     return Math.round(num * (10 ** decimals)) / (10 ** decimals);
 }

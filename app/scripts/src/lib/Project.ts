@@ -79,10 +79,7 @@ export class Project {
         this.hours = hours;
     }
 
-    /**
-     * Creates a string with the Project info in CSV format
-     * for saving it to disk.
-     */
+    /** Creates a string with the Project info in CSV format. */
     toCSV(): string {
         // --- values will be skipped when parsing the csv back into a Project
         // filling the last 5 cells with --- now makes for an easier logic to
@@ -113,9 +110,8 @@ export class Project {
     }
 
     /**
-     * Parses a string e.g. read from a CSV file into a new
-     * Project instance. **Note** If parsing fails, undefined is
-     * returned.
+     * Parses a string (e.g. read from a CSV file) into a new
+     * Project instance.
      */
     static fromCSV(source: string): Project {
         const data = splitCSVstring(source).slice(12);

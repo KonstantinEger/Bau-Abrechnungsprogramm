@@ -4,11 +4,8 @@ import { Project } from './Project';
 import { throwFatalErr } from './errors';
 
 /**
- * When the open-btn is clicked:
- * [x] open "open file" dialog
- * [x] read file at user specified location
- * [x] parse string into Project instance
- * [x] return project to open
+ * Opens a dialog window where the user selects a file to be loaded as a
+ * project, which is then parsed and returned as a new instance.
  */
 export async function openProjectDialog() {
     const dialog = remote.dialog;
