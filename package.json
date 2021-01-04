@@ -1,12 +1,12 @@
 {
     "name": "abrechnungsprogramm",
-    "version": "0.0.0",
+    "version": "0.1.0-pre",
     "description": "Desktop App für Bau-Abrechnungen",
     "main": "main.js",
     "scripts": {
         "build-rollup": "rollup --config",
         "start": "electron .",
-        "build-win": "electron-packager ./ TBVAbrechnung --out ./dist/ --platform=win32 --icon=./app/assets/logo.ico"
+        "build-win": "electron-packager ./ TBVAbrechnung --out ./dist/ --platform=win32 --icon=./app/assets/logo.ico --ignore=tsconfig.json --ignore=rollup.config.js --ignore=.gitignore"
     },
     "repository": {
         "type": "git",
