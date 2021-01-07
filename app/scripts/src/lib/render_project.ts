@@ -88,7 +88,14 @@ function $<T = HTMLElement>(selector: string): T {
 export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
-    for (let mat of project.materials) {
+
+    enum ColumnIDs {
+        Name = 0,
+        Receipt = 1,
+        Price = 2
+    };
+
+    for (let [idx, mat] of project.materials.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
@@ -96,10 +103,73 @@ export function renderMatCol(project: Project): void {
         td1.textContent = mat.name;
         td2.textContent = mat.receiptID;
         td3.textContent = mat.price;
+        td1.id = `${idx}-${ColumnIDs.Name}`;
+        td2.id = `${idx}-${ColumnIDs.Receipt}`;
+        td3.id = `${idx}-${ColumnIDs.Price}`;
+        td1.addEventListener('dblclick', setupEditInput);
+        td2.addEventListener('dblclick', setupEditInput);
+        td3.addEventListener('dblclick', setupEditInput);
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
         table.appendChild(tr);
+    }
+
+    function setupEditInput(event: MouseEvent): void {
+        const eventTarget = event.target as HTMLTableDataCellElement;
+        const [rowIdx, colID] = parseElementIDInfo(eventTarget.id);
+        // TODO: return of close other inputs in cells if they should be open
+        const oldVal = eventTarget.textContent;
+        if (!oldVal) return;
+        const inputEl = document.createElement('input');
+        inputEl.value = oldVal;
+        if (colID === ColumnIDs.Price) inputEl.type = 'number';
+        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colID));
+        eventTarget.innerHTML = '';
+        eventTarget.appendChild(inputEl);
+    }
+
+    function parseElementIDInfo(id: string): [number, ColumnIDs] {
+        const values = id.split('-').map(x => parseInt(x));
+        return [values[0], values[1] as ColumnIDs];
+    }
+
+    function editInputHandlerForCell(rowIdx: number, colID: ColumnIDs) {
+        return async (event: KeyboardEvent) => {
+            if (event.code !== 'Enter') return;
+            const eventTarget = event.target as HTMLInputElement;
+            const newValue = eventTarget.value;
+            const projectStr = sessionStorage.getItem('CURRENT_PROJ');
+            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+            if (!projectStr || !filePath) {
+                console.warn('WARNING: project string or filepath from session storage not acceptable');
+                return;
+            }
+            const project = Project.fromCSV(projectStr);
+            switch (colID) {
+                case ColumnIDs.Name: {
+                    project.materials[rowIdx].name = newValue;
+                    break;
+                }
+                case ColumnIDs.Receipt: {
+                    project.materials[rowIdx].receiptID = newValue;
+                    break;
+                }
+                case ColumnIDs.Price: {
+                    project.materials[rowIdx].price = newValue;
+                    break;
+                }
+            };
+            const newCSV = project.toCSV();
+            sessionStorage.setItem('CURRENT_PROJ', newCSV);
+            try {
+                await fs.writeFile(filePath, newCSV);
+            } catch (err) {
+                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            }
+            renderMatCol(project);
+            renderBillCol(project);
+        };
     }
 }
 
@@ -107,6 +177,32 @@ export function renderMatCol(project: Project): void {
 export function renderWagesCol(project: Project): void {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
+
+    const keyUpHandler = (event: KeyboardEvent) => {
+        if (event.code !== 'Enter') return;
+        const eventTarget = event.target as HTMLInputElement;
+        const newValue = parseFloat(eventTarget.value);
+        const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
+        const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjectLoc || !oldProjectStr) {
+            console.warn('WARNING: project string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(oldProjectStr);
+        const listID = parseInt(eventTarget.id);
+        project.hours[listID].amount += newValue;
+        if (project.hours[listID].amount < 0) {
+            throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
+            return;
+        };
+        renderWagesCol(project);
+        renderBillCol(project);
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        fs.writeFile(oldProjectLoc, newCSV)
+            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
+    };
+
     for (let [idx, data] of project.hours.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
@@ -126,30 +222,7 @@ export function renderWagesCol(project: Project): void {
         tr.appendChild(td3);
         table.appendChild(tr);
 
-        changeInput.addEventListener('keyup', event => {
-            if (event.code !== 'Enter') return;
-            const eventTarget = event.target as HTMLInputElement;
-            const newValue = parseFloat(eventTarget.value);
-            const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
-            const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            if (!oldProjectLoc || !oldProjectStr) {
-                console.warn('WARNING: project string or filepath from session storage not acceptable');
-                return;
-            }
-            const project = Project.fromCSV(oldProjectStr);
-            const listID = parseInt(eventTarget.id);
-            project.hours[listID].amount += newValue;
-            if (project.hours[listID].amount < 0) {
-                throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
-                return;
-            };
-            renderWagesCol(project);
-            renderBillCol(project);
-            const newCSV = project.toCSV();
-            sessionStorage.setItem('CURRENT_PROJ', newCSV);
-            fs.writeFile(oldProjectLoc, newCSV)
-            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
-        });
+        changeInput.addEventListener('keyup', keyUpHandler);
     }
 }
 
