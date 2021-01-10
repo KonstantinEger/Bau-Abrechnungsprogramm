@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { Project } from './Project';
-import { delayEvent, desanitize, sanitize } from './utils';
+import { delayEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwFatalErr, throwErr } from './errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
@@ -138,7 +138,13 @@ export function renderMatCol(project: Project): void {
         return async (event: KeyboardEvent) => {
             if (event.code !== 'Enter') return;
             const eventTarget = event.target as HTMLInputElement;
+            eventTarget.classList.remove('invalid');
             const newValue = eventTarget.value;
+            if (!newValue || isInvalid(newValue)) {
+                eventTarget.classList.add('invalid');
+                throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
+                return;
+            }
             const projectStr = sessionStorage.getItem('CURRENT_PROJ');
             const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
             if (!projectStr || !filePath) {
