@@ -84,16 +84,16 @@ function $<T = HTMLElement>(selector: string): T {
     return el;
 }
 
+enum MatColumnIDs {
+    Name = 0,
+    Receipt = 1,
+    Price = 2
+};
+
 /** Renders **only** the materials table. (no footer) */
 export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
-
-    enum ColumnIDs {
-        Name = 0,
-        Receipt = 1,
-        Price = 2
-    };
 
     for (let [idx, mat] of project.materials.entries()) {
         const tr = document.createElement('tr');
@@ -103,80 +103,83 @@ export function renderMatCol(project: Project): void {
         td1.textContent = mat.name;
         td2.textContent = mat.receiptID;
         td3.textContent = mat.price;
-        td1.id = `${idx}-${ColumnIDs.Name}`;
-        td2.id = `${idx}-${ColumnIDs.Receipt}`;
-        td3.id = `${idx}-${ColumnIDs.Price}`;
-        td1.addEventListener('dblclick', setupEditInput);
-        td2.addEventListener('dblclick', setupEditInput);
-        td3.addEventListener('dblclick', setupEditInput);
+        td1.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Name));
+        td2.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Receipt));
+        td3.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Price));
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
         table.appendChild(tr);
     }
+}
 
-    function setupEditInput(event: MouseEvent): void {
+/**
+ * Event handler for a Material table cell, which when called, turns the
+ * contents of the cell into an HTMLInputElement for editing.
+ */
+function setupEditInput(rowIdx: number, colID: MatColumnIDs) {
+    return (event: MouseEvent) => {
         const eventTarget = event.target as HTMLTableDataCellElement;
-        const [rowIdx, colID] = parseElementIDInfo(eventTarget.id);
-        // TODO: return of close other inputs in cells if they should be open
         const oldVal = eventTarget.textContent;
         if (!oldVal) return;
         const inputEl = document.createElement('input');
         inputEl.value = oldVal;
-        if (colID === ColumnIDs.Price) inputEl.type = 'number';
+        if (colID === MatColumnIDs.Price) inputEl.type = 'number';
         inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colID));
         eventTarget.innerHTML = '';
         eventTarget.appendChild(inputEl);
-    }
+    };
+}
 
-    function parseElementIDInfo(id: string): [number, ColumnIDs] {
-        const values = id.split('-').map(x => parseInt(x));
-        return [values[0], values[1] as ColumnIDs];
-    }
-
-    function editInputHandlerForCell(rowIdx: number, colID: ColumnIDs) {
-        return async (event: KeyboardEvent) => {
-            if (event.code !== 'Enter') return;
-            const eventTarget = event.target as HTMLInputElement;
-            eventTarget.classList.remove('invalid');
-            const newValue = eventTarget.value;
-            if (!newValue || isInvalid(newValue)) {
-                eventTarget.classList.add('invalid');
-                throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
-                return;
+/**
+ * Keyup event handler on an HTMLInputElement in a Material column cell, which
+ * updates the current Project with the new Data in the input field when `ENTER`
+ * is pressed. If the Data is invalid, i. e. contains `,` or `"`, the user is
+ * alerted with an error and saving is aborted. If not, the whole column (also
+ * bill) is re-rendered, meaning the input field is converted back into text.
+ */
+function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
+    return async (event: KeyboardEvent) => {
+        if (event.code !== 'Enter') return;
+        const eventTarget = event.target as HTMLInputElement;
+        eventTarget.classList.remove('invalid');
+        const newValue = eventTarget.value;
+        if (!newValue || isInvalid(newValue)) {
+            eventTarget.classList.add('invalid');
+            throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
+            return;
+        }
+        const projectStr = sessionStorage.getItem('CURRENT_PROJ');
+        const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!projectStr || !filePath) {
+            console.warn('WARNING: project string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(projectStr);
+        switch (colID) {
+            case MatColumnIDs.Name: {
+                project.materials[rowIdx].name = newValue;
+                break;
             }
-            const projectStr = sessionStorage.getItem('CURRENT_PROJ');
-            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            if (!projectStr || !filePath) {
-                console.warn('WARNING: project string or filepath from session storage not acceptable');
-                return;
+            case MatColumnIDs.Receipt: {
+                project.materials[rowIdx].receiptID = newValue;
+                break;
             }
-            const project = Project.fromCSV(projectStr);
-            switch (colID) {
-                case ColumnIDs.Name: {
-                    project.materials[rowIdx].name = newValue;
-                    break;
-                }
-                case ColumnIDs.Receipt: {
-                    project.materials[rowIdx].receiptID = newValue;
-                    break;
-                }
-                case ColumnIDs.Price: {
-                    project.materials[rowIdx].price = newValue;
-                    break;
-                }
-            };
-            const newCSV = project.toCSV();
-            sessionStorage.setItem('CURRENT_PROJ', newCSV);
-            try {
-                await fs.writeFile(filePath, newCSV);
-            } catch (err) {
-                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+            case MatColumnIDs.Price: {
+                project.materials[rowIdx].price = newValue;
+                break;
             }
-            renderMatCol(project);
-            renderBillCol(project);
         };
-    }
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(filePath, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+        renderMatCol(project);
+        renderBillCol(project);
+    };
 }
 
 /** Renders **only** the worker table with event listeners. (no footer) */
