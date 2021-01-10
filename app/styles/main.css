@@ -41,6 +41,10 @@ body {
     margin: auto;
 }
 
+input.invalid {
+    border: 1px solid var(--secundary-color);
+}
+
 .center {
     text-align: center;
     padding: auto;

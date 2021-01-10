@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { Project } from './Project';
-import { delayEvent, desanitize, sanitize } from './utils';
+import { delayEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwFatalErr, throwErr } from './errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
@@ -84,11 +84,18 @@ function $<T = HTMLElement>(selector: string): T {
     return el;
 }
 
+enum MatColumnIDs {
+    Name = 0,
+    Receipt = 1,
+    Price = 2
+};
+
 /** Renders **only** the materials table. (no footer) */
 export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
-    for (let mat of project.materials) {
+
+    for (let [idx, mat] of project.materials.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
@@ -96,6 +103,9 @@ export function renderMatCol(project: Project): void {
         td1.textContent = mat.name;
         td2.textContent = mat.receiptID;
         td3.textContent = mat.price;
+        td1.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Name));
+        td2.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Receipt));
+        td3.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Price));
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
@@ -103,10 +113,105 @@ export function renderMatCol(project: Project): void {
     }
 }
 
+/**
+ * Event handler for a Material table cell, which when called, turns the
+ * contents of the cell into an HTMLInputElement for editing.
+ */
+function setupEditInput(rowIdx: number, colID: MatColumnIDs) {
+    return (event: MouseEvent) => {
+        const eventTarget = event.target as HTMLTableDataCellElement;
+        const oldVal = eventTarget.textContent;
+        if (!oldVal) return;
+        const inputEl = document.createElement('input');
+        inputEl.value = oldVal;
+        if (colID === MatColumnIDs.Price) inputEl.type = 'number';
+        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colID));
+        eventTarget.innerHTML = '';
+        eventTarget.appendChild(inputEl);
+    };
+}
+
+/**
+ * Keyup event handler on an HTMLInputElement in a Material column cell, which
+ * updates the current Project with the new Data in the input field when `ENTER`
+ * is pressed. If the Data is invalid, i. e. contains `,` or `"`, the user is
+ * alerted with an error and saving is aborted. If not, the whole column (also
+ * bill) is re-rendered, meaning the input field is converted back into text.
+ */
+function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
+    return async (event: KeyboardEvent) => {
+        if (event.code !== 'Enter') return;
+        const eventTarget = event.target as HTMLInputElement;
+        eventTarget.classList.remove('invalid');
+        const newValue = eventTarget.value;
+        if (!newValue || isInvalid(newValue)) {
+            eventTarget.classList.add('invalid');
+            throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
+            return;
+        }
+        const projectStr = sessionStorage.getItem('CURRENT_PROJ');
+        const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!projectStr || !filePath) {
+            console.warn('WARNING: project string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(projectStr);
+        switch (colID) {
+            case MatColumnIDs.Name: {
+                project.materials[rowIdx].name = newValue;
+                break;
+            }
+            case MatColumnIDs.Receipt: {
+                project.materials[rowIdx].receiptID = newValue;
+                break;
+            }
+            case MatColumnIDs.Price: {
+                project.materials[rowIdx].price = newValue;
+                break;
+            }
+        };
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        try {
+            await fs.writeFile(filePath, newCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+        renderMatCol(project);
+        renderBillCol(project);
+    };
+}
+
 /** Renders **only** the worker table with event listeners. (no footer) */
 export function renderWagesCol(project: Project): void {
     const table = $('#wages-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
+
+    const keyUpHandler = (event: KeyboardEvent) => {
+        if (event.code !== 'Enter') return;
+        const eventTarget = event.target as HTMLInputElement;
+        const newValue = parseFloat(eventTarget.value);
+        const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
+        const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!oldProjectLoc || !oldProjectStr) {
+            console.warn('WARNING: project string or filepath from session storage not acceptable');
+            return;
+        }
+        const project = Project.fromCSV(oldProjectStr);
+        const listID = parseInt(eventTarget.id);
+        project.hours[listID].amount += newValue;
+        if (project.hours[listID].amount < 0) {
+            throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
+            return;
+        };
+        renderWagesCol(project);
+        renderBillCol(project);
+        const newCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        fs.writeFile(oldProjectLoc, newCSV)
+            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
+    };
+
     for (let [idx, data] of project.hours.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
@@ -126,30 +231,7 @@ export function renderWagesCol(project: Project): void {
         tr.appendChild(td3);
         table.appendChild(tr);
 
-        changeInput.addEventListener('keyup', event => {
-            if (event.code !== 'Enter') return;
-            const eventTarget = event.target as HTMLInputElement;
-            const newValue = parseFloat(eventTarget.value);
-            const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
-            const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            if (!oldProjectLoc || !oldProjectStr) {
-                console.warn('WARNING: project string or filepath from session storage not acceptable');
-                return;
-            }
-            const project = Project.fromCSV(oldProjectStr);
-            const listID = parseInt(eventTarget.id);
-            project.hours[listID].amount += newValue;
-            if (project.hours[listID].amount < 0) {
-                throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
-                return;
-            };
-            renderWagesCol(project);
-            renderBillCol(project);
-            const newCSV = project.toCSV();
-            sessionStorage.setItem('CURRENT_PROJ', newCSV);
-            fs.writeFile(oldProjectLoc, newCSV)
-            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
-        });
+        changeInput.addEventListener('keyup', keyUpHandler);
     }
 }
 
