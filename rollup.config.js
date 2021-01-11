@@ -1,5 +1,10 @@
 import typescript from '@rollup/plugin-typescript';
 import html from 'rollup-plugin-html';
+import { terser } from 'rollup-plugin-terser';
+import { join } from 'path';
+
+const production = process.env.BUILD === 'release';
+console.log(`Building in ${production ? 'PROD' : 'DEV'} mode...`);
 
 const commons = {
     plugins: [
@@ -8,11 +13,12 @@ const commons = {
         }),
         html({
             include: '**/*.html',
-            minifierOptions: {
-                collapseWhitespace: true,
-                minifyJS: true
+            htmlMinifierOptions: {
+                collapseWhitespace: production,
+                minifyJS: production
             }
-        })
+        }),
+        production ? terser() : undefined
     ],
     format: 'cjs',
     externals: [
@@ -20,13 +26,16 @@ const commons = {
         'electron',
         '@electron/remote'
     ]
-}
+};
+
+const srcDir = join(__dirname, './app/scripts/src/');
+const distDir = join(__dirname, './app/scripts/dist/');
 
 export default [
     {
-        input: './app/scripts/src/index.ts',
+        input: join(srcDir, 'index.ts'),
         output: {
-            file: './app/scripts/dist/main-bundle.js',
+            file: join(distDir, 'main-bundle.js'),
             format: commons.format,
             sourcemap: true
         },
@@ -34,9 +43,9 @@ export default [
         external: commons.externals,
     },
     {
-        input: './app/scripts/src/new_project.ts',
+        input: join(srcDir, 'new_project.ts'),
         output: {
-            file: './app/scripts/dist/new-project-bundle.js',
+            file: join(distDir, 'new-project-bundle.js'),
             format: commons.format,
             sourcemap: true
         },
@@ -44,9 +53,9 @@ export default [
         external: commons.externals,
     },
     {
-        input: './app/scripts/src/new_material.ts',
+        input: join(srcDir, 'new_material.ts'),
         output: {
-            file: './app/scripts/dist/new-material-bundle.js',
+            file: join(distDir, 'new-material-bundle.js'),
             format: commons.format,
             sourcemap: true
         },
@@ -54,9 +63,9 @@ export default [
         external: commons.externals,
     },
     {
-        input: './app/scripts/src/new_worker_type.ts',
+        input: join(srcDir, 'new_worker_type.ts'),
         output: {
-            file: './app/scripts/dist/new-worker-bundle.js',
+            file: join(distDir, 'new-worker-bundle.js'),
             format: commons.format,
             sourcemap: true
         },
