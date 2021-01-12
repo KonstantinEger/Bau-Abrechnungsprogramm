@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { Project } from './Project';
-import { delayEvent, desanitize, isInvalid, sanitize } from './utils';
+import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwFatalErr, throwErr } from './errors';
 // @ts-expect-error
 import projectTemplate from '../../../project_template.html';
@@ -26,7 +26,7 @@ export async function renderProject(project: Project): Promise<void> {
     renderWagesCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = delayEvent(750, async (event: InputEvent) => {
+    $('#brutto-bill-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
@@ -47,7 +47,7 @@ export async function renderProject(project: Project): Promise<void> {
         }
     }) as (this: GlobalEventHandlers, ev: Event) => any;
 
-    $('#notes-input').oninput = delayEvent(750, async (event: InputEvent) => {
+    $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
         const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
         const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
