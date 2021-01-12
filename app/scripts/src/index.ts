@@ -81,22 +81,6 @@ interface MessageData {
         }
     };
 
-    window.addEventListener('keypress', async (event) => {
-        if (event.code === 'KeyS' && event.ctrlKey === true) {
-            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            const projectString = sessionStorage.getItem('CURRENT_PROJ');
-            if (!filePath || !projectString) {
-                console.warn('WARNING: filePath or projectString was not acceptable');
-                return
-            }
-            try {
-                await fs.writeFile(filePath, projectString);
-            } catch (err) {
-                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-            }
-        }
-    });
-
     document.querySelector('#btn-new')!.addEventListener('click', () => {
         window.open('./new_project.html', '_blank', 'width=800,height=600');
     });
