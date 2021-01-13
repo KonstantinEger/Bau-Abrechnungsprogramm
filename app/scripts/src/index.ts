@@ -5,17 +5,18 @@ import * as renderFns from './lib/render_project';
 import { openProjectDialog } from './lib/open_project_dialog';
 import { throwFatalErr } from './lib/errors';
 
+interface MessageData {
+    name: string,
+    project?: Project,
+    filePath?: string,
+    material?: Material,
+    worker?: Worker
+}
+
 (() => {
-    type MessageData = {
-        name: string,
-        project?: Project,
-        filePath?: string,
-        material?: Material,
-        worker?: Worker
-    }
 
     window.onmessage = async ({ data }: { data: MessageData }) => {
-        if (data.name === 'OPEN_PROJECT') {
+        if (data.name === 'NEW_PROJECT') {
             if (!data.project || !data.filePath) return;
             const project = new Project(
                 data.project.name,
@@ -80,27 +81,11 @@ import { throwFatalErr } from './lib/errors';
         }
     };
 
-    window.addEventListener('keypress', async (event) => {
-        if (event.code === 'KeyS' && event.ctrlKey === true) {
-            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            const projectString = sessionStorage.getItem('CURRENT_PROJ');
-            if (!filePath || !projectString) {
-                console.warn('WARNING: filePath or projectString was not acceptable');
-                return
-            }
-            try {
-                await fs.writeFile(filePath, projectString);
-            } catch (err) {
-                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-            }
-        }
-    });
-
-    document.querySelector('#btn-new')?.addEventListener('click', () => {
+    document.querySelector('#btn-new')!.addEventListener('click', () => {
         window.open('./new_project.html', '_blank', 'width=800,height=600');
     });
 
-    document.querySelector('#btn-open')?.addEventListener('click', () => {
+    document.querySelector('#btn-open')!.addEventListener('click', () => {
         openProjectDialog().then(proj => {
             if (!proj) return;
             renderFns.renderProject(proj);

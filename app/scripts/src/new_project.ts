@@ -4,7 +4,7 @@ import { throwErr, throwFatalErr } from './lib/errors';
 import { Project } from './lib/Project';
 import { isInvalid, sanitize } from './lib/utils';
 
-document.getElementById('submit-btn')?.addEventListener('click', async () => {
+document.getElementById('submit-btn')!.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
     const placeInput = document.getElementById('project-place-input') as HTMLInputElement;
     const dateInput = document.getElementById('project-date-input') as HTMLInputElement;
@@ -70,7 +70,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     }
 
     window.opener.postMessage({
-        name: 'OPEN_PROJECT',
+        name: 'NEW_PROJECT',
         project,
         filePath
     });
@@ -78,4 +78,4 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     window.close();
 });
 
-document.getElementById('close-window-btn')?.addEventListener('click', window.close);
+document.getElementById('close-window-btn')!.addEventListener('click', window.close);
