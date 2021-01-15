@@ -25,10 +25,10 @@ export default {
         sourcemap: true
     },
     plugins: [
-        del({
+        production ? del({
             targets: './app/scripts/dist/*',
             verbose: true
-        }),
+        }) : undefined,
         typescript({
             tsconfig: './tsconfig.json'
         }),

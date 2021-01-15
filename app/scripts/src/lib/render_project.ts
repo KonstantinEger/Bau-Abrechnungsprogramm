@@ -17,11 +17,7 @@ export async function renderProject(project: Project): Promise<void> {
 
     document.body.innerHTML = projectTemplate;
 
-    $('#project-name-display').textContent = project.name;
-    $('#project-place-display').textContent = project.place;
-    $('#project-date-display').textContent = project.date;
-    $<HTMLTextAreaElement>('#notes-input').value = desanitize(project.descr);
-
+    renderHeader(project);
     renderMatCol(project);
     renderWagesCol(project);
     renderBillCol(project);
@@ -84,11 +80,100 @@ function $<T = HTMLElement>(selector: string): T {
     return el;
 }
 
+enum HeaderDisplayType {
+    NAME,
+    PLACE,
+    DATE
+}
+
+/** Renders the header for the project view */
+function renderHeader(project: Project): void {
+    const nameDisplay = $('#project-name-display');
+    const placeDisplay = $('#project-place-display');
+    const dateDisplay = $('#project-date-display');
+    const descrInput = $<HTMLTextAreaElement>('#notes-input');
+    nameDisplay.textContent = project.name;
+    placeDisplay.textContent = project.place;
+    dateDisplay.textContent = new Date(project.date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+    descrInput.value = desanitize(project.descr);
+    nameDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.NAME));
+    placeDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.PLACE));
+    dateDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.DATE));
+}
+
+/**
+ * Event handler, which when fired, turns the contents of the display
+ * element into an input with its old content as the value. This also
+ * sets up event listeners which handle changes to these inputs for
+ * saving the new data.
+ */
+function setupHeaderEditInputs(elementType: HeaderDisplayType) {
+    return (event: MouseEvent): void => {
+        const eventTarget = event.target as HTMLSpanElement;
+        eventTarget.innerHTML = '';
+        const inputEl = document.createElement('input');
+        inputEl.type = elementType === HeaderDisplayType.DATE ? 'date' : 'text';
+        const { project, filePath } = Project.getCurrentProject();
+        switch (elementType) {
+            case HeaderDisplayType.NAME:
+                inputEl.value = project.name;
+                break;
+            case HeaderDisplayType.PLACE:
+                inputEl.value = project.place;
+                break;
+            case HeaderDisplayType.DATE:
+                inputEl.value = project.date;
+                break;
+        }
+        inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
+        eventTarget.appendChild(inputEl);
+    }
+}
+
+/**
+ * Event handler for edit input elements in the header of the project view.
+ * When fired, gets the value from the input, checks if it's valid and updates
+ * the current project in web storage and on disk. That's why it requires
+ * the current project and filePath as parameters, which theoretically shouldn't
+ * be out of sync by then. Calls a re-render of the header at the end.
+ */
+function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Project, projectFilePath: string) {
+    return async (event: Event) => {
+        const inputEl = event.target as HTMLInputElement;
+        inputEl.classList.remove('invalid');
+        const newVal = inputEl.value;
+        if (!newVal || isInvalid(newVal)) {
+            inputEl.classList.add('invalid');
+            throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
+            return;
+        }
+        switch (elementType) {
+            case HeaderDisplayType.NAME:
+                project.name = newVal;
+                break;
+            case HeaderDisplayType.PLACE:
+                project.place = newVal;
+                break;
+            case HeaderDisplayType.DATE:
+                project.date = newVal;
+                break;
+        }
+        const projectCSV = project.toCSV();
+        sessionStorage.setItem('CURRENT_PROJ', projectCSV);
+        try {
+            await fs.writeFile(projectFilePath, projectCSV);
+        } catch (err) {
+            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
+        }
+        renderHeader(project);
+    }
+}
+
 enum MatColumnIDs {
     Name = 0,
     Receipt = 1,
     Price = 2
-};
+}
 
 /** Renders **only** the materials table. (no footer) */
 export function renderMatCol(project: Project): void {
@@ -103,9 +188,9 @@ export function renderMatCol(project: Project): void {
         td1.textContent = mat.name;
         td2.textContent = mat.receiptID;
         td3.textContent = mat.price;
-        td1.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Name));
-        td2.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Receipt));
-        td3.addEventListener('dblclick', setupEditInput(idx, MatColumnIDs.Price));
+        td1.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Name));
+        td2.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Receipt));
+        td3.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Price));
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
@@ -117,7 +202,7 @@ export function renderMatCol(project: Project): void {
  * Event handler for a Material table cell, which when called, turns the
  * contents of the cell into an HTMLInputElement for editing.
  */
-function setupEditInput(rowIdx: number, colID: MatColumnIDs) {
+function setupMatEditInput(rowIdx: number, colID: MatColumnIDs) {
     return (event: MouseEvent) => {
         const eventTarget = event.target as HTMLTableDataCellElement;
         const oldVal = eventTarget.textContent;

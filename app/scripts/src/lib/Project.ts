@@ -1,3 +1,5 @@
+import { throwFatalErr } from "./errors";
+
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
  */
@@ -137,5 +139,21 @@ export class Project {
         }
 
         return project;
+    }
+
+    /**
+     * Returns the current project saved in session storage and the location
+     * of the project file. If one of them is not found, throws an fatal error.
+     */
+    static getCurrentProject(): { project: Project, filePath: string } {
+        const csv = sessionStorage.getItem('CURRENT_PROJ');
+        const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        if (!csv || !filePath) {
+            throwFatalErr('Internal Error', 'Es ist ein interner Fehler beim laden des aktuellen Projektes aufgetreten.');
+        }
+        return {
+            project: Project.fromCSV(csv),
+            filePath
+        };
     }
 }
