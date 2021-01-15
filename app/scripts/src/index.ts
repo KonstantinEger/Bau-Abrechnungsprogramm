@@ -34,13 +34,7 @@ interface MessageData {
             renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
             if (!data.material) return;
-            const projectStr = sessionStorage.getItem('CURRENT_PROJ');
-            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            if (!projectStr || !filePath) {
-                console.warn('WARNING: project string or filepath from session storage not acceptable');
-                return
-            }
-            const project = Project.fromCSV(projectStr);
+            const { filePath, project } = Project.getCurrentProject();
             project.materials.push({
                 name: data.material.name,
                 receiptID: data.material.receiptID,
@@ -57,13 +51,7 @@ interface MessageData {
             renderFns.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
             if (!data.worker) return;
-            const projectStr = sessionStorage.getItem('CURRENT_PROJ');
-            const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-            if (!projectStr || !filePath) {
-                console.warn('WARNING: project string or filepath from session storage not acceptable');
-                return
-            }
-            const project = Project.fromCSV(projectStr);
+            const { filePath, project } = Project.getCurrentProject();
             project.hours.push({
                 type: data.worker.type,
                 amount: data.worker.amount,

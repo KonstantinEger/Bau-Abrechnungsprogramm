@@ -25,19 +25,13 @@ export async function renderProject(project: Project): Promise<void> {
     $('#brutto-bill-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
-        const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
-        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
-        if (!oldProjStr || !projectLoc) {
-            console.warn('WARNING: project-string or filepath from session storage not acceptable');
-            return;
-        }
-        const project = Project.fromCSV(oldProjStr);
+        const { filePath, project } = Project.getCurrentProject();
         project.brutto = parseFloat(inputValue);
         renderBillCol(project);
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
-            await fs.writeFile(projectLoc, newCSV);
+            await fs.writeFile(filePath, newCSV);
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
@@ -45,18 +39,12 @@ export async function renderProject(project: Project): Promise<void> {
 
     $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
-        const oldProjStr = sessionStorage.getItem('CURRENT_PROJ');
-        const projectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
-        if (!oldProjStr || !projectLoc) {
-            console.warn('WARNING: project-string or filepath from session storage not acceptable');
-            return;
-        }
-        const project = Project.fromCSV(oldProjStr);
+        const { filePath, project } = Project.getCurrentProject();
         project.descr = sanitize(inputValue);
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
         try {
-            await fs.writeFile(projectLoc, newCSV);
+            await fs.writeFile(filePath, newCSV);
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
@@ -234,13 +222,7 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
             throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
             return;
         }
-        const projectStr = sessionStorage.getItem('CURRENT_PROJ');
-        const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
-        if (!projectStr || !filePath) {
-            console.warn('WARNING: project string or filepath from session storage not acceptable');
-            return;
-        }
-        const project = Project.fromCSV(projectStr);
+        const { filePath, project } = Project.getCurrentProject();
         switch (colID) {
             case MatColumnIDs.Name: {
                 project.materials[rowIdx].name = newValue;
@@ -276,13 +258,7 @@ export function renderWagesCol(project: Project): void {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
         const newValue = parseFloat(eventTarget.value);
-        const oldProjectStr = sessionStorage.getItem('CURRENT_PROJ');
-        const oldProjectLoc = sessionStorage.getItem('CURRENT_PROJ_LOC');
-        if (!oldProjectLoc || !oldProjectStr) {
-            console.warn('WARNING: project string or filepath from session storage not acceptable');
-            return;
-        }
-        const project = Project.fromCSV(oldProjectStr);
+        const { project, filePath } = Project.getCurrentProject();
         const listID = parseInt(eventTarget.id);
         project.hours[listID].amount += newValue;
         if (project.hours[listID].amount < 0) {
@@ -293,7 +269,7 @@ export function renderWagesCol(project: Project): void {
         renderBillCol(project);
         const newCSV = project.toCSV();
         sessionStorage.setItem('CURRENT_PROJ', newCSV);
-        fs.writeFile(oldProjectLoc, newCSV)
+        fs.writeFile(filePath, newCSV)
             .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
