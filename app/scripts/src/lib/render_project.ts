@@ -28,8 +28,7 @@ export async function renderProject(project: Project): Promise<void> {
         const { filePath, project } = Project.getCurrentProject();
         project.brutto = parseFloat(inputValue);
         renderBillCol(project);
-        const newCSV = project.toCSV();
-        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        const newCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
         } catch (err) {
@@ -41,8 +40,7 @@ export async function renderProject(project: Project): Promise<void> {
         const inputValue = (event.target as HTMLTextAreaElement).value;
         const { filePath, project } = Project.getCurrentProject();
         project.descr = sanitize(inputValue);
-        const newCSV = project.toCSV();
-        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        const newCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
         } catch (err) {
@@ -146,8 +144,7 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
                 project.date = newVal;
                 break;
         }
-        const projectCSV = project.toCSV();
-        sessionStorage.setItem('CURRENT_PROJ', projectCSV);
+        const projectCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(projectFilePath, projectCSV);
         } catch (err) {
@@ -237,8 +234,7 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
                 break;
             }
         };
-        const newCSV = project.toCSV();
-        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        const newCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
         } catch (err) {
@@ -267,8 +263,7 @@ export function renderWagesCol(project: Project): void {
         };
         renderWagesCol(project);
         renderBillCol(project);
-        const newCSV = project.toCSV();
-        sessionStorage.setItem('CURRENT_PROJ', newCSV);
+        const newCSV = project.saveToSessionStorage();
         fs.writeFile(filePath, newCSV)
             .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };

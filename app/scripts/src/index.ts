@@ -29,8 +29,7 @@ interface MessageData {
                 false
             );
             project.id = data.project.id;
-            sessionStorage.setItem('CURRENT_PROJ', project.toCSV());
-            sessionStorage.setItem('CURRENT_PROJ_LOC', data.filePath);
+            project.saveToSessionStorage({ filePath: data.filePath });
             renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
             if (!data.material) return;
@@ -40,8 +39,7 @@ interface MessageData {
                 receiptID: data.material.receiptID,
                 price: data.material.price
             });
-            const newCSV = project.toCSV();
-            sessionStorage.setItem('CURRENT_PROJ', newCSV);
+            const newCSV = project.saveToSessionStorage();
             try {
                 await fs.writeFile(filePath, newCSV);
             } catch (err) {
@@ -57,8 +55,7 @@ interface MessageData {
                 amount: data.worker.amount,
                 wage: data.worker.wage
             });
-            const newCSV = project.toCSV();
-            sessionStorage.setItem('CURRENT_PROJ', newCSV);
+            const newCSV = project.saveToSessionStorage();
             try {
                 await fs.writeFile(filePath, newCSV);
             } catch (err) {

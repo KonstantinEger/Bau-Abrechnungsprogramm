@@ -32,7 +32,7 @@ export async function openProjectDialog() {
     } catch (err) {
         throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
     }
-    sessionStorage.setItem('CURRENT_PROJ', csvString);
-    sessionStorage.setItem('CURRENT_PROJ_LOC', filePaths[0]);
-    return Project.fromCSV(csvString);
+    const project = Project.fromCSV(csvString);
+    project.saveToSessionStorage({ filePath: filePaths[0], csvString });
+    return project;
 }
