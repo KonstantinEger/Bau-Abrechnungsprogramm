@@ -5,6 +5,7 @@
     "main": "main.js",
     "scripts": {
         "lint": "eslint .",
+        "ts:check": "tsc",
         "build-rollup": "rollup --config",
         "build-rollup-release": "rollup --config --environment BUILD:release",
         "start": "electron .",

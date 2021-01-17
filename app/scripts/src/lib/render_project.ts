@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import { Project } from './Project';
 import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwFatalErr, throwErr } from './errors';
+// eslint-disable-next-line line-comment-position
 // @ts-expect-error Imports html as a string (rollup plugin)
 import projectTemplate from '../../../project_template.html';
 
@@ -50,14 +51,15 @@ export async function renderProject(project: Project): Promise<void> {
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
-    }
+    };
 
     $('#add-new-worker-type-btn').onclick = () => {
         window.open('./new_worker_type.html', '_blank', 'width=480,height=420');
-    }
+    };
 }
 
 /** Select a Element (shortcut for document.querySelector) and throws if none found. */
+// eslint-disable-next-line id-length
 function $<T = HTMLElement>(selector: string): T {
     const el = document.querySelector(selector) as T | null;
     if (!el) {
@@ -80,7 +82,8 @@ function renderHeader(project: Project): void {
     const descrInput = $<HTMLTextAreaElement>('#notes-input');
     nameDisplay.textContent = project.name;
     placeDisplay.textContent = project.place;
-    dateDisplay.textContent = new Date(project.date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dateIntlOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+    dateDisplay.textContent = new Date(project.date).toLocaleDateString('de-DE', dateIntlOptions);
     descrInput.value = desanitize(project.descr);
     nameDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.NAME));
     placeDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.PLACE));
@@ -113,7 +116,7 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
         }
         inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
         eventTarget.appendChild(inputEl);
-    }
+    };
 }
 
 /**
@@ -151,7 +154,7 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
         renderHeader(project);
-    }
+    };
 }
 
 enum MatColumnIDs {
@@ -265,7 +268,7 @@ export function renderWagesCol(project: Project): void {
         renderBillCol(project);
         const newCSV = project.saveToSessionStorage();
         fs.writeFile(filePath, newCSV)
-            .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
+            .catch((err) => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
     for (const [idx, data] of project.hours.entries()) {
@@ -311,7 +314,7 @@ export function renderBillCol(project: Project): void {
         : '0.00%';
 
     const bilanzDisp = $('#bilanz-display');
-    if (bilanz < 0) bilanzDisp.classList.add('negative')
+    if (bilanz < 0) bilanzDisp.classList.add('negative');
     else bilanzDisp.classList.remove('negative');
 }
 

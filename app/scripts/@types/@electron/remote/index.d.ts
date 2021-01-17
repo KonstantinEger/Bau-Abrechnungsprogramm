@@ -11,7 +11,9 @@ declare module '@electron/remote' {
         defaultPath?: string;
         buttonLabel?: string;
         filters?: FileFilter[];
-        properties?: Array<'openFile' | 'openDirectory' | 'multiSelections' | 'showHiddenFiles' | 'createDirectory' | 'promptToCreate' | 'noResolveAliases' | 'treatPackageAsDirectory' | 'dontAddToRecent'>;
+        properties?: ('openFile' | 'openDirectory' | 'multiSelections' | 'showHiddenFiles' |
+        'createDirectory' | 'promptToCreate' | 'noResolveAliases' | 'treatPackageAsDirectory' |
+        'dontAddToRecent')[];
         message?: string;
         securityScopedBookmarks?: boolean;
     }
@@ -24,7 +26,8 @@ declare module '@electron/remote' {
         message?: string;
         nameFieldLabel?: string;
         showsTagField?: boolean;
-        properties?: Array<'showHiddenFiles' | 'createDirectory' | 'treatPackageAsDirectory' | 'showOverwriteConfirmation' | 'dontAddToRecent'>;
+        properties?: ('showHiddenFiles' | 'createDirectory' | 'treatPackageAsDirectory' |
+        'showOverwriteConfirmation' | 'dontAddToRecent')[];
         securityScopedBookmarks?: boolean;
     }
 

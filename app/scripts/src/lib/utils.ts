@@ -8,7 +8,7 @@ export function debounceEvent<T extends unknown[]>(ms: number, callback: (...arg
     return (...args: T) => {
         clearTimeout(timer);
         timer = window.setTimeout(() => callback(...args), ms);
-    }
+    };
 }
 
 /**

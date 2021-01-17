@@ -15,7 +15,7 @@ export default {
         join(srcDir, 'index.ts'),
         join(srcDir, 'new_material.ts'),
         join(srcDir, 'new_project.ts'),
-        join(srcDir, 'new_worker_type.ts'),
+        join(srcDir, 'new_worker_type.ts')
     ],
     output: {
         format: 'cjs',

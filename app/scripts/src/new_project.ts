@@ -13,7 +13,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     placeInput.classList.remove('invalid');
     dateInput.classList.remove('invalid');
 
-    // input validation
+    /* input validation */
     {
         let exitDueToError = false;
         if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
@@ -37,7 +37,6 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         }
     }
 
-    // save-dialog
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
     const opts = {
@@ -48,20 +47,18 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
             { name: 'Bauprojekt', extensions: ['tbvp.csv'] },
             { name: 'Alle Datein', extensions: ['*'] }
         ]
-    }
+    };
     const { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
     if (canceled || !filePath) return;
 
-    // create project instance and write to disk
-    const project = new Project(
-        nameInput.value,
-        dateInput.value,
-        placeInput.value,
-        sanitize(notesInput.value),
-        0,
-        [],
-        []
-    );
+    const project = new Project({
+        name: nameInput.value,
+        date: dateInput.value,
+        place: placeInput.value,
+        description: sanitize(notesInput.value),
+        brutto: 0,
+        shouldGenID: true
+    });
 
     try {
         await fs.writeFile(filePath, project.toCSV());

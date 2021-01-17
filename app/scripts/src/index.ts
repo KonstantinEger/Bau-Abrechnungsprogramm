@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import { ipcRenderer as ipc } from 'electron';
-import { Project, Worker, Material } from './lib/Project';
+import { Project } from './lib/Project';
+import type { Material, Worker } from './lib/Project';
 import * as renderFns from './lib/render_project';
 import { openProjectDialog } from './lib/open_project_dialog';
 import { throwFatalErr } from './lib/errors';
@@ -18,16 +19,16 @@ interface MessageData {
     window.onmessage = async ({ data }: { data: MessageData }) => {
         if (data.name === 'NEW_PROJECT') {
             if (!data.project || !data.filePath) return;
-            const project = new Project(
-                data.project.name,
-                data.project.date,
-                data.project.place,
-                data.project.descr,
-                data.project.brutto,
-                data.project.materials,
-                data.project.hours,
-                false
-            );
+            const project = new Project({
+                name: data.project.name,
+                date: data.project.date,
+                place: data.project.place,
+                description: data.project.descr,
+                brutto: data.project.brutto,
+                materials: data.project.materials,
+                hours: data.project.hours,
+                shouldGenID: false
+            });
             project.id = data.project.id;
             project.saveToSessionStorage({ filePath: data.filePath });
             renderFns.renderProject(project);
@@ -71,7 +72,7 @@ interface MessageData {
     });
 
     document.querySelector('#btn-open')?.addEventListener('click', () => {
-        openProjectDialog().then(proj => {
+        openProjectDialog().then((proj) => {
             if (!proj) return;
             renderFns.renderProject(proj);
         });
@@ -83,7 +84,7 @@ ipc.on('open:new-project-dialog', () => {
 });
 
 ipc.on('open:open-project-dialog', () => {
-    openProjectDialog().then(proj => {
+    openProjectDialog().then((proj) => {
         if (!proj) return;
         renderFns.renderProject(proj);
     });
