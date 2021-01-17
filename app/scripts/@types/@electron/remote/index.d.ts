@@ -1,5 +1,5 @@
 declare module '@electron/remote' {
-    type BrowserWindow = {};
+    type BrowserWindow = Record<string, unknown>;
 
     interface FileFilter {
         name: string;

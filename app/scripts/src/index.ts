@@ -66,11 +66,11 @@ interface MessageData {
         }
     };
 
-    document.querySelector('#btn-new')!.addEventListener('click', () => {
+    document.querySelector('#btn-new')?.addEventListener('click', () => {
         window.open('./new_project.html', '_blank', 'width=800,height=600');
     });
 
-    document.querySelector('#btn-open')!.addEventListener('click', () => {
+    document.querySelector('#btn-open')?.addEventListener('click', () => {
         openProjectDialog().then(proj => {
             if (!proj) return;
             renderFns.renderProject(proj);

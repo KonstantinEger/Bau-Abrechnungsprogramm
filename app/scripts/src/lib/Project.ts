@@ -41,9 +41,9 @@ function genID(): string {
  * from a comment to [this answer](https://stackoverflow.com/a/11457952) on stack overflow.
  */
 function splitCSVstring(str: string): string[] {
-    let regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
-    let arr = [];
-    let res;
+    const regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+    const arr: string[] = [];
+    let res: RegExpExecArray | null;
     while ((res = regexp.exec(str)) !== null) { arr.push(res[0].replace(/(?:^")|(?:"$)/g, '')); }
     return arr;
 }
@@ -141,7 +141,7 @@ export class Project {
         const project = new Project(data[1], data[2], data[3], data[4], parseFloat(data[5]), [], [], false);
         project.id = data[0];
 
-        let matAndHoursArray = data.slice(12);
+        const matAndHoursArray = data.slice(12);
         for (let i = 0; i < matAndHoursArray.length; i += 6) {
             if (matAndHoursArray[i] !== '---') {
                 project.materials.push({

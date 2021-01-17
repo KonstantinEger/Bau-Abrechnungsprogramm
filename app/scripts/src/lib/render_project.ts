@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { Project } from './Project';
 import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwFatalErr, throwErr } from './errors';
-// @ts-expect-error
+// @ts-expect-error Imports html as a string (rollup plugin)
 import projectTemplate from '../../../project_template.html';
 
 /**
@@ -34,7 +34,7 @@ export async function renderProject(project: Project): Promise<void> {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    }) as (this: GlobalEventHandlers, ev: Event) => any;
+    }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
@@ -46,7 +46,7 @@ export async function renderProject(project: Project): Promise<void> {
         } catch (err) {
             throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
         }
-    }) as (this: GlobalEventHandlers, ev: Event) => any;
+    }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#add-new-material-btn').onclick = () => {
         window.open('./new_material.html', '_blank', 'width=480,height=420');
@@ -165,7 +165,7 @@ export function renderMatCol(project: Project): void {
     const table = $('#mat-table');
     table.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
 
-    for (let [idx, mat] of project.materials.entries()) {
+    for (const [idx, mat] of project.materials.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
@@ -233,7 +233,7 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
                 project.materials[rowIdx].price = newValue;
                 break;
             }
-        };
+        }
         const newCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
@@ -260,7 +260,7 @@ export function renderWagesCol(project: Project): void {
         if (project.hours[listID].amount < 0) {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
-        };
+        }
         renderWagesCol(project);
         renderBillCol(project);
         const newCSV = project.saveToSessionStorage();
@@ -268,7 +268,7 @@ export function renderWagesCol(project: Project): void {
             .catch(err => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
-    for (let [idx, data] of project.hours.entries()) {
+    for (const [idx, data] of project.hours.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
@@ -317,8 +317,8 @@ export function renderBillCol(project: Project): void {
 
 /** Sums up all expenses of a `Project` */
 function calcExpenses(project: Project): [number, number] {
-    let matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
-    let wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
+    const matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
+    const wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
     return [matExps, wagesExps];
 }
 

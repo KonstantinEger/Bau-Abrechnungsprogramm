@@ -4,7 +4,7 @@
     "description": "Desktop App für Bau-Abrechnungen",
     "main": "main.js",
     "scripts": {
-        "lint": "eslint . --ext .ts",
+        "lint": "eslint .",
         "build-rollup": "rollup --config",
         "build-rollup-release": "rollup --config --environment BUILD:release",
         "start": "electron .",
