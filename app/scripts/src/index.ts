@@ -12,7 +12,7 @@ interface MessageData {
     filePath?: string,
     material?: Material,
     worker?: Worker
-}
+};
 
 (() => {
 
