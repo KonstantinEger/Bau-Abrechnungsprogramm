@@ -89,7 +89,7 @@ export class Project {
     /** Creates a string with the Project info in CSV format. */
     public toCSV(): string {
         /* --- values will be skipped when parsing the csv back into a Project
-         * filling the last 5 cells with --- now makes for an easier logic to
+         * filling the last 6 cells with --- now makes for an easier logic to
          * create the CSV string. Its also necessary for the splitCSVstring
          * funktion to work.
         */

@@ -249,7 +249,7 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
 
 /** Renders **only** the worker table with event listeners. (no footer) */
 export function renderWorkersCol(project: Project): void {
-    const table = $('#wages-table');
+    const table = $('#workers-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
 
     const keyUpHandler = (event: KeyboardEvent) => {
@@ -306,7 +306,7 @@ export function renderBillCol(project: Project): void {
     const expenses = calcExpenses(project);
     const bilanz = netto - (expenses[0] + expenses[1]);
     $('#material-costs-display').textContent = `${roundTo(expenses[0], 2)}€`;
-    $('#wages-costs-display').textContent = `${roundTo(expenses[1], 2)}€`;
+    $('#workers-costs-display').textContent = `${roundTo(expenses[1], 2)}€`;
     $('#bilanz-euros-display').textContent = `${roundTo(bilanz, 2)}€`;
     $('#bilanz-percent-display').textContent = netto !== 0
         ? `${roundTo((bilanz / netto) * 100, 2)}%`

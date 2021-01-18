@@ -35,12 +35,12 @@ span#project-name-display {
     border-top: 3px solid var(--primary-color);
 }
 
-.column#materials-col, .column#wages-col {
+.column#materials-col, .column#workers-col {
     border-right: 2px solid var(--primary-color);
 }
 
 .column#materials-col > .col-body,
-.column#wages-col > .col-body {
+.column#workers-col > .col-body {
     height: calc(100vh - 170px);
     overflow-y: scroll;
 }
@@ -71,18 +71,18 @@ span#project-name-display {
     border: 1px solid #000000;
 }
 
-/* For add-button in wages column */
-.column#wages-col > .col-body tr > td:nth-child(3) {
+/* For add-input in worker column */
+.column#workers-col > .col-body tr > td:nth-child(3) {
     padding-left: 10px;
     width: 27px;
 }
 
-.column#wages-col > .col-body tr > td input[type="number"] {
+.column#workers-col > .col-body tr > td input[type="number"] {
     width: 50px;
     margin-left: 0px;
 }
 
-/* Column footer for materials and wages */
+/* Column footer for materials and workers */
 .col-footer {
     border-top: 1px solid black;
 }
