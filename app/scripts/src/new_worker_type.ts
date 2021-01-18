@@ -1,5 +1,5 @@
-import { throwErr } from './lib/errors';
 import { isInvalid } from './lib/utils';
+import { throwErr } from './lib/errors';
 
 document.getElementById('type-name-input')?.focus();
 

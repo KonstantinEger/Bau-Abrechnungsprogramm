@@ -1,8 +1,8 @@
+import * as renderFns from './lib/render_project';
+import type { Material, Worker } from './lib/Project';
+import { Project } from './lib/Project';
 import { promises as fs } from 'fs';
 import { ipcRenderer as ipc } from 'electron';
-import { Project } from './lib/Project';
-import type { Material, Worker } from './lib/Project';
-import * as renderFns from './lib/render_project';
 import { openProjectDialog } from './lib/open_project_dialog';
 import { throwFatalErr } from './lib/errors';
 

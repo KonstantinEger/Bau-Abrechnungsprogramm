@@ -1,8 +1,8 @@
-import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
+import { isInvalid, sanitize } from './lib/utils';
 import { throwErr, throwFatalErr } from './lib/errors';
 import { Project } from './lib/Project';
-import { isInvalid, sanitize } from './lib/utils';
+import { promises as fs } from 'fs';
 
 document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
@@ -41,7 +41,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const browserWin = remote.getCurrentWindow();
     const opts = {
         title: 'Neues Projekt speichern',
-        defaultPath: (process.env.HOME || process.env.HOMEPATH) + `\\${nameInput.value}.tbvp.csv`,
+        defaultPath: `${process.env.HOME || process.env.HOMEPATH}\\${nameInput.value}.tbvp.csv`,
         buttonLabel: 'Neues Bauprojekt Speichern',
         filters: [
             { name: 'Bauprojekt', extensions: ['tbvp.csv'] },

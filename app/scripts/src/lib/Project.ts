@@ -1,4 +1,4 @@
-import { throwFatalErr } from "./errors";
+import { throwFatalErr } from './errors';
 
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
@@ -6,7 +6,7 @@ import { throwFatalErr } from "./errors";
 function genID(): string {
     const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
 
-    return "" + s5() + "-" + s5() + "-" + s5();
+    return `${s5()}-${s5()}-${s5()}`;
 }
 
 /**
@@ -16,26 +16,26 @@ function genID(): string {
  * This function only works when there ar no empty fields like:
  * `Hello,,World,`. Empty fields are ignored. It should be changed
  * to `Hello,---,World`
- * 
+ *
  * ### Example
  * ```js
  * let str = `Hello,World,"Hello,World"`;
  * let result = splitCSVstring(str);
  * assert(result, ['Hello', 'World', 'Hello,World']);
  * ```
- * 
+ *
  * Whitespace at front and end of a field are removed:
  * ```js
  * let str = 'Hello, World';
  * assert(splitCSVstring(str), ['Hello', 'World']);
  * ```
- * 
+ *
  * Empty fields are removed:
  * ```js
  * let str = 'Hello,,World';
  * assert(splitCSVstring(str), ['Hello', 'World']);
  * ```
- * 
+ *
  * ### Source
  * Shamelessly ripped of the internet. Original by
  * [martinp999](https://stackoverflow.com/users/580772/martinp999) from a comment to
@@ -45,8 +45,9 @@ function splitCSVstring(str: string): string[] {
     const regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
     const arr: string[] = [];
     let res: RegExpExecArray | null;
-    while ((res = regexp.exec(str)) !== null) 
+    while ((res = regexp.exec(str)) !== null) {
         arr.push(res[0].replace(/(?:^")|(?:"$)/g, ''));
+    }
     return arr;
 }
 
@@ -137,10 +138,7 @@ export class Project {
         return csv;
     }
 
-    /**
-     * Parses a string (e.g. read from a CSV file) into a new
-     * Project instance.
-     */
+    /** Parses a string (e.g. read from a CSV file) into a new Project instance. */
     public static fromCSV(source: string): Project {
         const data = splitCSVstring(source).slice(12);
         const project = new Project({

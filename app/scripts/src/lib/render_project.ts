@@ -1,7 +1,7 @@
-import { promises as fs } from 'fs';
-import { Project } from './Project';
 import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
-import { throwFatalErr, throwErr } from './errors';
+import { throwErr, throwFatalErr } from './errors';
+import { Project } from './Project';
+import { promises as fs } from 'fs';
 // eslint-disable-next-line line-comment-position
 // @ts-expect-error Imports html as a string (rollup plugin)
 import projectTemplate from '../../../project_template.html';
@@ -14,7 +14,7 @@ export async function renderProject(project: Project): Promise<void> {
     if (!project) return;
 
     document.body.innerHTML = '';
-    document.title = 'Bau-Abrechnungen | Projekt | ' + project.name;
+    document.title = `Bau-Abrechnungen | Projekt | ${project.name}`;
 
     document.body.innerHTML = projectTemplate;
 
@@ -26,10 +26,10 @@ export async function renderProject(project: Project): Promise<void> {
     $('#brutto-bill-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
-        const { filePath, project } = Project.getCurrentProject();
-        project.brutto = parseFloat(inputValue);
-        renderBillCol(project);
-        const newCSV = project.saveToSessionStorage();
+        const { filePath, project: currentProject } = Project.getCurrentProject();
+        currentProject.brutto = parseFloat(inputValue);
+        renderBillCol(currentProject);
+        const newCSV = currentProject.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
         } catch (err) {
@@ -39,9 +39,9 @@ export async function renderProject(project: Project): Promise<void> {
 
     $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
-        const { filePath, project } = Project.getCurrentProject();
-        project.descr = sanitize(inputValue);
-        const newCSV = project.saveToSessionStorage();
+        const { filePath, project: currentProject } = Project.getCurrentProject();
+        currentProject.descr = sanitize(inputValue);
+        const newCSV = currentProject.saveToSessionStorage();
         try {
             await fs.writeFile(filePath, newCSV);
         } catch (err) {
@@ -59,7 +59,6 @@ export async function renderProject(project: Project): Promise<void> {
 }
 
 /** Select a Element (shortcut for document.querySelector) and throws if none found. */
-// eslint-disable-next-line id-length
 function $<T = HTMLElement>(selector: string): T {
     const el = document.querySelector(selector) as T | null;
     if (!el) {
@@ -257,16 +256,16 @@ export function renderWagesCol(project: Project): void {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
         const newValue = parseFloat(eventTarget.value);
-        const { project, filePath } = Project.getCurrentProject();
+        const { project: currentProject, filePath } = Project.getCurrentProject();
         const listID = parseInt(eventTarget.id);
-        project.hours[listID].amount += newValue;
-        if (project.hours[listID].amount < 0) {
+        currentProject.hours[listID].amount += newValue;
+        if (currentProject.hours[listID].amount < 0) {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
         }
-        renderWagesCol(project);
-        renderBillCol(project);
-        const newCSV = project.saveToSessionStorage();
+        renderWagesCol(currentProject);
+        renderBillCol(currentProject);
+        const newCSV = currentProject.saveToSessionStorage();
         fs.writeFile(filePath, newCSV)
             .catch((err) => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
@@ -277,12 +276,12 @@ export function renderWagesCol(project: Project): void {
         const td2 = document.createElement('td');
         const td3 = document.createElement('td');
 
-        td1.textContent = data.type + ' - ' + data.wage + '€';
+        td1.textContent = `${data.type} - ${data.wage}€`;
         td2.textContent = data.amount.toString();
         const changeInput = document.createElement('input');
         changeInput.type = 'number';
         changeInput.value = '0';
-        changeInput.id = '' + idx; // used to refrence it in keyup event
+        changeInput.id = String(idx); // used to refrence it in keyup event
         td3.appendChild(changeInput);
 
         tr.appendChild(td1);
@@ -302,15 +301,15 @@ export function renderBillCol(project: Project): void {
     $<HTMLInputElement>('#brutto-bill-input').value = project.brutto.toString();
     const mwst = 0.19;
     const netto = project.brutto - (project.brutto * mwst);
-    $('#netto-bill-display').textContent = roundTo(netto, 2) + '€';
+    $('#netto-bill-display').textContent = `${roundTo(netto, 2)}€`;
 
     const expenses = calcExpenses(project);
     const bilanz = netto - (expenses[0] + expenses[1]);
-    $('#material-costs-display').textContent = roundTo(expenses[0], 2) + '€';
-    $('#wages-costs-display').textContent = roundTo(expenses[1], 2) + '€';
-    $('#bilanz-euros-display').textContent = roundTo(bilanz, 2) + '€';
+    $('#material-costs-display').textContent = `${roundTo(expenses[0], 2)}€`;
+    $('#wages-costs-display').textContent = `${roundTo(expenses[1], 2)}€`;
+    $('#bilanz-euros-display').textContent = `${roundTo(bilanz, 2)}€`;
     $('#bilanz-percent-display').textContent = netto !== 0
-        ? roundTo((bilanz / netto) * 100, 2) + '%'
+        ? `${roundTo((bilanz / netto) * 100, 2)}%`
         : '0.00%';
 
     const bilanzDisp = $('#bilanz-display');

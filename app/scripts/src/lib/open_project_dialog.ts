@@ -1,6 +1,6 @@
-import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
 import { Project } from './Project';
+import { promises as fs } from 'fs';
 import { throwFatalErr } from './errors';
 
 /**

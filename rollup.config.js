@@ -1,8 +1,8 @@
-import typescript from '@rollup/plugin-typescript';
-import html from 'rollup-plugin-html';
 import del from 'rollup-plugin-delete';
-import { terser } from 'rollup-plugin-terser';
+import html from 'rollup-plugin-html';
 import { join } from 'path';
+import { terser } from 'rollup-plugin-terser';
+import typescript from '@rollup/plugin-typescript';
 
 const production = process.env.BUILD === 'release';
 console.log(`Building in ${production ? 'PROD' : 'DEV'} mode...`);
