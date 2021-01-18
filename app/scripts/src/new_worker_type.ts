@@ -1,9 +1,9 @@
-import { throwErr } from './lib/errors';
 import { isInvalid } from './lib/utils';
+import { throwErr } from './lib/errors';
 
-document.getElementById('type-name-input')!.focus();
+document.getElementById('type-name-input')?.focus();
 
-document.getElementById('submit-btn')!.addEventListener('click', () => {
+document.getElementById('submit-btn')?.addEventListener('click', () => {
     const typeInput = document.getElementById('type-name-input') as HTMLInputElement;
     const wageInput = document.getElementById('wage-input') as HTMLInputElement;
     const hoursInput = document.getElementById('hours-amount-input') as HTMLInputElement;
@@ -46,4 +46,4 @@ document.getElementById('submit-btn')!.addEventListener('click', () => {
     window.close();
 });
 
-document.getElementById('close-window-btn')!.addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

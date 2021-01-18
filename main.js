@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const electron = require('electron');
 const url = require('url');
 const path = require('path');

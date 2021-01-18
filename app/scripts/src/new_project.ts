@@ -1,10 +1,10 @@
-import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
+import { isInvalid, sanitize } from './lib/utils';
 import { throwErr, throwFatalErr } from './lib/errors';
 import { Project } from './lib/Project';
-import { isInvalid, sanitize } from './lib/utils';
+import { promises as fs } from 'fs';
 
-document.getElementById('submit-btn')!.addEventListener('click', async () => {
+document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
     const placeInput = document.getElementById('project-place-input') as HTMLInputElement;
     const dateInput = document.getElementById('project-date-input') as HTMLInputElement;
@@ -13,7 +13,7 @@ document.getElementById('submit-btn')!.addEventListener('click', async () => {
     placeInput.classList.remove('invalid');
     dateInput.classList.remove('invalid');
 
-    // input validation
+    /* input validation */
     {
         let exitDueToError = false;
         if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
@@ -37,31 +37,28 @@ document.getElementById('submit-btn')!.addEventListener('click', async () => {
         }
     }
 
-    // save-dialog
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
-    let opts = {
+    const opts = {
         title: 'Neues Projekt speichern',
-        defaultPath: (process.env.HOME || process.env.HOMEPATH) + `\\${nameInput.value}.tbvp.csv`,
+        defaultPath: `${process.env.HOME || process.env.HOMEPATH}\\${nameInput.value}.tbvp.csv`,
         buttonLabel: 'Neues Bauprojekt Speichern',
         filters: [
             { name: 'Bauprojekt', extensions: ['tbvp.csv'] },
             { name: 'Alle Datein', extensions: ['*'] }
         ]
-    }
-    let { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
+    };
+    const { canceled, filePath } = await dialog.showSaveDialog(browserWin, opts);
     if (canceled || !filePath) return;
 
-    // create project instance and write to disk
-    const project = new Project(
-        nameInput.value,
-        dateInput.value,
-        placeInput.value,
-        sanitize(notesInput.value),
-        0,
-        [],
-        []
-    );
+    const project = new Project({
+        name: nameInput.value,
+        date: dateInput.value,
+        place: placeInput.value,
+        description: sanitize(notesInput.value),
+        brutto: 0,
+        shouldGenID: true
+    });
 
     try {
         await fs.writeFile(filePath, project.toCSV());
@@ -78,4 +75,4 @@ document.getElementById('submit-btn')!.addEventListener('click', async () => {
     window.close();
 });
 
-document.getElementById('close-window-btn')!.addEventListener('click', window.close);
+document.getElementById('close-window-btn')?.addEventListener('click', window.close);

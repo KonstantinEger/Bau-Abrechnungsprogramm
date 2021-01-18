@@ -3,12 +3,12 @@
  * multiple times _within_ the delay time period, only the _last one_ will
  * actually get executed.
  */
-export function debounceEvent<T extends any[]>(ms: number, callback: (...args: T) => void) {
+export function debounceEvent<T extends unknown[]>(ms: number, callback: (...args: T) => void): (...args: T) => void {
     let timer = 0;
     return (...args: T) => {
         clearTimeout(timer);
         timer = window.setTimeout(() => callback(...args), ms);
-    }
+    };
 }
 
 /**

@@ -1,17 +1,17 @@
-import { promises as fs } from 'fs';
 import * as remote from '@electron/remote';
 import { Project } from './Project';
+import { promises as fs } from 'fs';
 import { throwFatalErr } from './errors';
 
 /**
  * Opens a dialog window where the user selects a file to be loaded as a
  * project, which is then parsed and returned as a new instance.
  */
-export async function openProjectDialog() {
+export async function openProjectDialog(): Promise<Project | undefined> {
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
 
-    let opts: remote.OpenDialogOpts = {
+    const opts: remote.OpenDialogOpts = {
         title: 'Bauprojekt öffnen',
         defaultPath: process.env.HOME || process.env.HOMEPATH,
         buttonLabel: 'Öffnen',
