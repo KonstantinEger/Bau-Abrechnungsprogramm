@@ -6,8 +6,8 @@ import { ipcRenderer as ipc } from 'electron';
 import { openProjectDialog } from './lib/open_project_dialog';
 import { throwFatalErr } from './lib/errors';
 
-interface MessageData {
-    name: string,
+export interface MessageData {
+    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE',
     project?: Project,
     filePath?: string,
     material?: Material,

@@ -1,6 +1,7 @@
 import * as remote from '@electron/remote';
 import { isInvalid, sanitize } from './lib/utils';
 import { throwErr, throwFatalErr } from './lib/errors';
+import type { MessageData } from '.';
 import { Project } from './lib/Project';
 import { promises as fs } from 'fs';
 
@@ -70,7 +71,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         name: 'NEW_PROJECT',
         project,
         filePath
-    });
+    } as MessageData);
 
     window.close();
 });

@@ -1,3 +1,4 @@
+import type { MessageData } from '.';
 import type { Worker } from './lib/Project';
 import { isInvalid } from './lib/utils';
 import { throwErr } from './lib/errors';
@@ -42,7 +43,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
             numHours: parseFloat(hoursInput.value),
             wage: parseFloat(wageInput.value)
         } as Worker
-    });
+    } as MessageData);
 
     window.close();
 });
