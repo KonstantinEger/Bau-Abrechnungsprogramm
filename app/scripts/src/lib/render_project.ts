@@ -2,8 +2,6 @@ import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './Project';
 import { promises as fs } from 'fs';
-// eslint-disable-next-line line-comment-position
-// @ts-expect-error Imports html as a string (rollup plugin)
 import projectTemplate from '../../../project_template.html';
 
 /**
