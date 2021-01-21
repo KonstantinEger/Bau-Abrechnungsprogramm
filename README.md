@@ -1,6 +1,8 @@
 # Bau-Abrechnungsprogramm
 Programm zur Vereinfachung von Abrechnungen der Baufirma "Tiefbau Vogel"
 
+![checks](https://github.com/KonstantinEger/Bau-Abrechnungsprogramm/workflows/Lint/badge.svg)
+
 ## Projekt-Infos
 - electron-basiertes Programm
 - Datenspeicherung: siehe "[Wie Daten gespeichert werden](#wie-daten-gespeichert-werden)"
