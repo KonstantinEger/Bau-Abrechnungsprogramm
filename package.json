@@ -8,8 +8,8 @@
         "ts:check": "tsc",
         "build-rollup": "rollup --config",
         "build-rollup-release": "rollup --config --environment BUILD:release",
-        "start": "electron .",
-        "build-win": "npm run build-rollup-release && electron-packager ./ TBVAbrechnung --out ./dist/ --platform=win32 --icon=./app/assets/logo.ico --ignore=tsconfig.json --ignore=rollup.config.js --ignore=.gitignore"
+        "start": "electron . --dev",
+        "build-win": "npm run build-rollup-release && electron-packager ./ TBVAbrechnung --out ./dist/ --platform=win32 --icon=./app/assets/logo.ico --overwrite --ignore=tsconfig.json --ignore=rollup.config.js --ignore=.gitignore"
     },
     "repository": {
         "type": "git",

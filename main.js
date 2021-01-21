@@ -71,7 +71,8 @@ app.on('ready', () => {
                     label: 'DevTools',
                     click() {
                         mainWindow.webContents.openDevTools();
-                    }
+                    },
+                    visible: isDev()
                 }
             ]
         }
@@ -81,3 +82,8 @@ app.on('ready', () => {
 });
 
 ipcMain.once('quit-app', () => app.quit());
+
+/** Returns `true` if the process is run in an development environment, `false` if not. */
+function isDev() {
+    return process.argv.includes('--dev');
+}
