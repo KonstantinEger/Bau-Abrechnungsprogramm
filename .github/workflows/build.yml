@@ -1,0 +1,21 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build_win:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: npm ci
+      - name: Build for Windows
+        run: npm run build-win
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-build-artifact
+          path: dist/TBVAbrechnung-win32-x64
