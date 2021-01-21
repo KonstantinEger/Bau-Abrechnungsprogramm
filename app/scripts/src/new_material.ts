@@ -1,3 +1,5 @@
+import type { Material } from './lib/Project';
+import type { MessageData } from '.';
 import { isInvalid } from './lib/utils';
 import { throwErr } from './lib/errors';
 
@@ -40,8 +42,8 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
             name: nameInput.value,
             receiptID: receiptIdInput.value,
             price: priceInput.value
-        }
-    });
+        } as Material
+    } as MessageData);
 
     window.close();
 });

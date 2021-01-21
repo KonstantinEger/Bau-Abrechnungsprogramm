@@ -6,8 +6,8 @@ import { ipcRenderer as ipc } from 'electron';
 import { openProjectDialog } from './lib/open_project_dialog';
 import { throwFatalErr } from './lib/errors';
 
-interface MessageData {
-    name: string,
+export interface MessageData {
+    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE',
     project?: Project,
     filePath?: string,
     material?: Material,
@@ -26,7 +26,7 @@ interface MessageData {
                 description: data.project.descr,
                 brutto: data.project.brutto,
                 materials: data.project.materials,
-                hours: data.project.hours,
+                workers: data.project.workers,
                 shouldGenID: false
             });
             project.id = data.project.id;
@@ -51,9 +51,9 @@ interface MessageData {
         } else if (data.name === 'NEW_WORKER_TYPE') {
             if (!data.worker) return;
             const { filePath, project } = Project.getCurrentProject();
-            project.hours.push({
+            project.workers.push({
                 type: data.worker.type,
-                amount: data.worker.amount,
+                numHours: data.worker.numHours,
                 wage: data.worker.wage
             });
             const newCSV = project.saveToSessionStorage();
@@ -62,7 +62,7 @@ interface MessageData {
             } catch (err) {
                 throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
             }
-            renderFns.renderWagesCol(project);
+            renderFns.renderWorkersCol(project);
             renderFns.renderBillCol(project);
         }
     };

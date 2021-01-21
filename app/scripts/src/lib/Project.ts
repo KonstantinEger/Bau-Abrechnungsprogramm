@@ -52,7 +52,7 @@ function splitCSVstring(str: string): string[] {
 }
 
 export type Material = { name: string, receiptID: string, price: string };
-export type Worker = { type: string, wage: number, amount: number };
+export type Worker = { type: string, wage: number, numHours: number };
 
 interface ProjectConstructorParams {
     name: string,
@@ -62,7 +62,7 @@ interface ProjectConstructorParams {
     brutto: number,
     shouldGenID: boolean
     materials?: Material[],
-    hours?: Worker[],
+    workers?: Worker[],
 }
 
 export class Project {
@@ -73,7 +73,7 @@ export class Project {
     public descr: string;
     public brutto: number;
     public materials: Material[];
-    public hours: Worker[];
+    public workers: Worker[];
 
     public constructor(params: ProjectConstructorParams) {
         this.id = params.shouldGenID ? genID() : '';
@@ -83,20 +83,20 @@ export class Project {
         this.descr = params.description;
         this.brutto = params.brutto;
         this.materials = params.materials ?? [];
-        this.hours = params.hours ?? [];
+        this.workers = params.workers ?? [];
     }
 
     /** Creates a string with the Project info in CSV format. */
     public toCSV(): string {
         /* --- values will be skipped when parsing the csv back into a Project
-         * filling the last 5 cells with --- now makes for an easier logic to
+         * filling the last 6 cells with --- now makes for an easier logic to
          * create the CSV string. Its also necessary for the splitCSVstring
          * funktion to work.
         */
-        let result = 'id,name,date,place,description,brutto,m-names,m-receipt-ids,m-prices,h-types,h-amounts,h-wages,\n'
+        let result = 'id,name,date,place,description,brutto,m-names,m-receipt-ids,m-prices,w-types,w-num-hours,w-wages,\n'
             + `${this.id},"${this.name}",${this.date},"${this.place}","${this.descr}",${this.brutto},---,---,---,---,---,---,\n`;
 
-        for (let idx = 0; idx < Math.max(this.materials.length, this.hours.length); idx++) {
+        for (let idx = 0; idx < Math.max(this.materials.length, this.workers.length); idx++) {
             let str = ',,,,,,';
 
             if (this.materials[idx] !== undefined) {
@@ -105,8 +105,8 @@ export class Project {
                 str += '---,---,---,';
             }
 
-            if (this.hours[idx] !== undefined) {
-                str += `"${this.hours[idx].type}",${this.hours[idx].amount},${this.hours[idx].wage},\n`;
+            if (this.workers[idx] !== undefined) {
+                str += `"${this.workers[idx].type}",${this.workers[idx].numHours},${this.workers[idx].wage},\n`;
             } else {
                 str += '---,---,---,\n';
             }
@@ -151,20 +151,20 @@ export class Project {
         });
         project.id = data[0];
 
-        const matAndHoursArray = data.slice(12);
-        for (let idx = 0; idx < matAndHoursArray.length; idx += 6) {
-            if (matAndHoursArray[idx] !== '---') {
+        const matAndWorkersArray = data.slice(12);
+        for (let idx = 0; idx < matAndWorkersArray.length; idx += 6) {
+            if (matAndWorkersArray[idx] !== '---') {
                 project.materials.push({
-                    name: matAndHoursArray[idx],
-                    receiptID: matAndHoursArray[idx + 1],
-                    price: matAndHoursArray[idx + 2]
+                    name: matAndWorkersArray[idx],
+                    receiptID: matAndWorkersArray[idx + 1],
+                    price: matAndWorkersArray[idx + 2]
                 });
             }
-            if (matAndHoursArray[idx + 3] !== '---') {
-                project.hours.push({
-                    type: matAndHoursArray[idx + 3],
-                    amount: parseFloat(matAndHoursArray[idx + 4]),
-                    wage: parseFloat(matAndHoursArray[idx + 5])
+            if (matAndWorkersArray[idx + 3] !== '---') {
+                project.workers.push({
+                    type: matAndWorkersArray[idx + 3],
+                    numHours: parseFloat(matAndWorkersArray[idx + 4]),
+                    wage: parseFloat(matAndWorkersArray[idx + 5])
                 });
             }
         }

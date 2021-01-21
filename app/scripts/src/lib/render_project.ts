@@ -20,7 +20,7 @@ export async function renderProject(project: Project): Promise<void> {
 
     renderHeader(project);
     renderMatCol(project);
-    renderWagesCol(project);
+    renderWorkersCol(project);
     renderBillCol(project);
 
     $('#brutto-bill-input').oninput = debounceEvent(750, async (event: InputEvent) => {
@@ -248,8 +248,8 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
 }
 
 /** Renders **only** the worker table with event listeners. (no footer) */
-export function renderWagesCol(project: Project): void {
-    const table = $('#wages-table');
+export function renderWorkersCol(project: Project): void {
+    const table = $('#workers-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
 
     const keyUpHandler = (event: KeyboardEvent) => {
@@ -258,30 +258,30 @@ export function renderWagesCol(project: Project): void {
         const newValue = parseFloat(eventTarget.value);
         const { project: currentProject, filePath } = Project.getCurrentProject();
         const listID = parseInt(eventTarget.id);
-        currentProject.hours[listID].amount += newValue;
-        if (currentProject.hours[listID].amount < 0) {
+        currentProject.workers[listID].numHours += newValue;
+        if (currentProject.workers[listID].numHours < 0) {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
         }
-        renderWagesCol(currentProject);
+        renderWorkersCol(currentProject);
         renderBillCol(currentProject);
         const newCSV = currentProject.saveToSessionStorage();
         fs.writeFile(filePath, newCSV)
             .catch((err) => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
-    for (const [idx, data] of project.hours.entries()) {
+    for (const [idx, data] of project.workers.entries()) {
         const tr = document.createElement('tr');
         const td1 = document.createElement('td');
         const td2 = document.createElement('td');
         const td3 = document.createElement('td');
 
         td1.textContent = `${data.type} - ${data.wage}€`;
-        td2.textContent = data.amount.toString();
+        td2.textContent = data.numHours.toString();
         const changeInput = document.createElement('input');
         changeInput.type = 'number';
         changeInput.value = '0';
-        changeInput.id = String(idx); // used to refrence it in keyup event
+        changeInput.id = idx.toString(); // used to refrence it in keyup event
         td3.appendChild(changeInput);
 
         tr.appendChild(td1);
@@ -306,7 +306,7 @@ export function renderBillCol(project: Project): void {
     const expenses = calcExpenses(project);
     const bilanz = netto - (expenses[0] + expenses[1]);
     $('#material-costs-display').textContent = `${roundTo(expenses[0], 2)}€`;
-    $('#wages-costs-display').textContent = `${roundTo(expenses[1], 2)}€`;
+    $('#workers-costs-display').textContent = `${roundTo(expenses[1], 2)}€`;
     $('#bilanz-euros-display').textContent = `${roundTo(bilanz, 2)}€`;
     $('#bilanz-percent-display').textContent = netto !== 0
         ? `${roundTo((bilanz / netto) * 100, 2)}%`
@@ -320,7 +320,7 @@ export function renderBillCol(project: Project): void {
 /** Sums up all expenses of a `Project` */
 function calcExpenses(project: Project): [number, number] {
     const matExps = project.materials.reduce((sum, mat) => sum + parseFloat(mat.price), 0);
-    const wagesExps = project.hours.reduce((sum, hour) => sum + (hour.amount * hour.wage), 0);
+    const wagesExps = project.workers.reduce((sum, worker) => sum + (worker.numHours * worker.wage), 0);
     return [matExps, wagesExps];
 }
 
