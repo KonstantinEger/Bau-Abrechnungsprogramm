@@ -35,7 +35,7 @@
         "keyword-spacing": "error",
         "line-comment-position": ["warn", { "position": "beside" }],
         "max-depth": ["warn", 3],
-        "max-len": ["warn", 130],
+        "max-len": ["warn", { "code": 130, "ignoreComments": true }],
         "max-lines": ["warn", 400],
         "max-params": ["warn", 3],
         "max-nested-callbacks": ["warn", 2],
