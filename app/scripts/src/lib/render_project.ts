@@ -16,7 +16,7 @@ export async function renderProject(project: Project): Promise<void> {
 
     document.body.innerHTML = projectTemplate;
 
-    renderHeader(project);
+    renderHeader(project, { addDblclickListeners: true });
     renderMatCol(project);
     renderWorkersCol(project);
     renderBillCol(project);
@@ -65,14 +65,24 @@ function $<T = HTMLElement>(selector: string): T {
     return el;
 }
 
-enum HeaderDisplayType {
-    NAME,
-    PLACE,
-    DATE
+interface RenderHeaderOptions {
+    addDblclickListeners?: boolean;
 }
 
-/** Renders the header for the project view */
-function renderHeader(project: Project): void {
+enum HeaderDisplayType {
+    NAME = 'name',
+    PLACE = 'place',
+    DATE = 'date'
+}
+
+/**
+ * Renders the header for the project view.
+ * ! Only adds the `dblclick` listeners to the property fields when specified so in the `opts` object.
+ * This should **only** be the case for the initial render, as the event listeners would keep stacking,
+ * slowing down the app and leading to bugs.
+ * TODO: Find a better solution
+ */
+function renderHeader(project: Project, opts?: RenderHeaderOptions): void {
     const nameDisplay = $('#project-name-display');
     const placeDisplay = $('#project-place-display');
     const dateDisplay = $('#project-date-display');
@@ -82,9 +92,11 @@ function renderHeader(project: Project): void {
     const dateIntlOptions = { day: 'numeric', month: 'long', year: 'numeric' };
     dateDisplay.textContent = new Date(project.date).toLocaleDateString('de-DE', dateIntlOptions);
     descrInput.value = desanitize(project.descr);
-    nameDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.NAME));
-    placeDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.PLACE));
-    dateDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.DATE));
+    if (opts?.addDblclickListeners === true) {
+        nameDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.NAME));
+        placeDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.PLACE));
+        dateDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.DATE));
+    }
 }
 
 /**
@@ -96,6 +108,7 @@ function renderHeader(project: Project): void {
 function setupHeaderEditInputs(elementType: HeaderDisplayType) {
     return (event: MouseEvent): void => {
         const eventTarget = event.target as HTMLSpanElement;
+        const oldValue = eventTarget.textContent;
         eventTarget.innerHTML = '';
         const inputEl = document.createElement('input');
         inputEl.type = elementType === HeaderDisplayType.DATE ? 'date' : 'text';
@@ -112,7 +125,11 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
                 break;
         }
         inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
+        inputEl.addEventListener('blur', () => {
+            eventTarget.textContent = oldValue;
+        });
         eventTarget.appendChild(inputEl);
+        inputEl.focus();
     };
 }
 
@@ -133,17 +150,7 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
             throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
             return;
         }
-        switch (elementType) {
-            case HeaderDisplayType.NAME:
-                project.name = newVal;
-                break;
-            case HeaderDisplayType.PLACE:
-                project.place = newVal;
-                break;
-            case HeaderDisplayType.DATE:
-                project.date = newVal;
-                break;
-        }
+        project[elementType] = newVal;
         const projectCSV = project.saveToSessionStorage();
         try {
             await fs.writeFile(projectFilePath, projectCSV);
