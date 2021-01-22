@@ -3,6 +3,8 @@ const electron = require('electron');
 const url = require('url');
 const path = require('path');
 
+const devMode = process.argv.includes('--dev');
+
 require('@electron/remote/main').initialize();
 
 const { app, BrowserWindow, Menu, ipcMain } = electron;
@@ -53,6 +55,25 @@ app.on('ready', () => {
             ]
         },
         {
+            label: 'Ansicht',
+            submenu: [
+                {
+                    label: 'Neu laden',
+                    accelerator: 'CmdOrCtrl+R',
+                    click(_item, win) {
+                        win.reload();
+                    }
+                },
+                {
+                    label: 'Vollbild',
+                    accelerator: 'F11',
+                    click(_item, win) {
+                        if (win.maximizable) win.maximize();
+                    }
+                }
+            ]
+        },
+        {
             label: 'Hilfe',
             submenu: [
                 {
@@ -72,7 +93,8 @@ app.on('ready', () => {
                     click() {
                         mainWindow.webContents.openDevTools();
                     },
-                    visible: isDev()
+                    accelerator: devMode ? 'CmdOrCtrl+Shift+I' : undefined,
+                    visible: devMode
                 }
             ]
         }
@@ -82,8 +104,3 @@ app.on('ready', () => {
 });
 
 ipcMain.once('quit-app', () => app.quit());
-
-/** Returns `true` if the process is run in an development environment, `false` if not. */
-function isDev() {
-    return process.argv.includes('--dev');
-}
