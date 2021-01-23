@@ -1,7 +1,6 @@
 import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './Project';
-import { promises as fs } from 'fs';
 import projectTemplate from '../../../project_template.html';
 
 /**
@@ -26,25 +25,15 @@ export async function renderProject(project: Project): Promise<void> {
         if (!inputValue) return;
         const { filePath, project: currentProject } = Project.getCurrentProject();
         currentProject.brutto = parseFloat(inputValue);
+        await currentProject.save(filePath);
         renderBillCol(currentProject);
-        const newCSV = currentProject.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
         const { filePath, project: currentProject } = Project.getCurrentProject();
         currentProject.descr = sanitize(inputValue);
-        const newCSV = currentProject.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await currentProject.save(filePath);
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#add-new-material-btn').onclick = () => {
@@ -151,12 +140,7 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
             return;
         }
         project[elementType] = newVal;
-        const projectCSV = project.saveToSessionStorage();
-        try {
-            await fs.writeFile(projectFilePath, projectCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await project.save(projectFilePath);
         renderHeader(project);
     };
 }
@@ -241,12 +225,7 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
                 break;
             }
         }
-        const newCSV = project.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await project.save(filePath);
         renderMatCol(project);
         renderBillCol(project);
     };
@@ -257,7 +236,7 @@ export function renderWorkersCol(project: Project): void {
     const table = $('#workers-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
 
-    const keyUpHandler = (event: KeyboardEvent) => {
+    const keyUpHandler = async (event: KeyboardEvent) => {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
         const newValue = parseFloat(eventTarget.value);
@@ -268,11 +247,9 @@ export function renderWorkersCol(project: Project): void {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
         }
+        await project.save(filePath);
         renderWorkersCol(currentProject);
         renderBillCol(currentProject);
-        const newCSV = currentProject.saveToSessionStorage();
-        fs.writeFile(filePath, newCSV)
-            .catch((err) => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
     for (const [idx, data] of project.workers.entries()) {

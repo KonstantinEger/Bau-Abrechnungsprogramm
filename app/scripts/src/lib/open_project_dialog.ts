@@ -33,6 +33,6 @@ export async function openProjectDialog(): Promise<Project | undefined> {
         throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
     }
     const project = Project.fromCSV(csvString);
-    project.saveToSessionStorage({ filePath: filePaths[0], csvString });
+    await project.save(filePaths[0], { skipDisk: true, otherCsv: csvString });
     return project;
 }
