@@ -4,7 +4,7 @@ import { writeFile } from 'fs';
 /**
  * Generates a unique ID with the format `xxxxx-xxxxx-xxxxx` of letters and numbers.
  */
-function genID(): string {
+function genId(): string {
     const s5 = () => Math.floor((1 + Math.random()) * 0x100000).toString(16).substring(1);
 
     return `${s5()}-${s5()}-${s5()}`;
@@ -42,7 +42,7 @@ function genID(): string {
  * [martinp999](https://stackoverflow.com/users/580772/martinp999) from a comment to
  * [this answer](https://stackoverflow.com/a/11457952) on stack overflow.
  */
-function splitCSVstring(str: string): string[] {
+function splitCsvString(str: string): string[] {
     const regexp = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
     const arr: string[] = [];
     let res: RegExpExecArray | null;
@@ -52,18 +52,18 @@ function splitCSVstring(str: string): string[] {
     return arr;
 }
 
-export type Material = { name: string, receiptID: string, price: string };
-export type Worker = { type: string, wage: number, numHours: number };
+export type Material = { name: string; receiptId: string; price: string };
+export type Worker = { type: string; wage: number; numHours: number };
 
 interface ProjectConstructorParams {
-    name: string,
-    date: string,
-    place: string,
-    description: string,
-    brutto: number,
-    shouldGenID: boolean
-    materials?: Material[],
-    workers?: Worker[],
+    name: string;
+    date: string;
+    place: string;
+    description: string;
+    brutto: number;
+    shouldGenId: boolean;
+    materials?: Material[];
+    workers?: Worker[];
 }
 
 interface SaveProjectOptions {
@@ -75,8 +75,8 @@ interface SaveProjectOptions {
 
 export class Project {
     private static storageKeys = {
-        PROJECT: 'CURRENT_PROJ',
-        FILEPATH: 'CURRENT_PROJ_LOC'
+        project: 'CURRENT_PROJ',
+        filepath: 'CURRENT_PROJ_LOC'
     } as const;
 
     public id: string;
@@ -89,7 +89,7 @@ export class Project {
     public workers: Worker[];
 
     public constructor(params: ProjectConstructorParams) {
-        this.id = params.shouldGenID ? genID() : '';
+        this.id = params.shouldGenId ? genId() : '';
         this.name = params.name;
         this.date = params.date;
         this.place = params.place;
@@ -99,8 +99,58 @@ export class Project {
         this.workers = params.workers ?? [];
     }
 
+    /** Parses a string (e.g. read from a CSV file) into a new Project instance. */
+    public static fromCsv(source: string): Project {
+        const data = splitCsvString(source).slice(12);
+        const project = new Project({
+            name: data[1],
+            date: data[2],
+            place: data[3],
+            description: data[4],
+            brutto: parseFloat(data[5]),
+            shouldGenId: false
+        });
+        project.id = data[0];
+
+        const matAndWorkersArray = data.slice(12);
+        for (let idx = 0; idx < matAndWorkersArray.length; idx += 6) {
+            if (matAndWorkersArray[idx] !== '---') {
+                project.materials.push({
+                    name: matAndWorkersArray[idx],
+                    receiptId: matAndWorkersArray[idx + 1],
+                    price: matAndWorkersArray[idx + 2]
+                });
+            }
+            if (matAndWorkersArray[idx + 3] !== '---') {
+                project.workers.push({
+                    type: matAndWorkersArray[idx + 3],
+                    numHours: parseFloat(matAndWorkersArray[idx + 4]),
+                    wage: parseFloat(matAndWorkersArray[idx + 5])
+                });
+            }
+        }
+
+        return project;
+    }
+
+    /**
+     * Returns the current project saved in session storage and the location
+     * of the project file. If one of them is not found, throws an fatal error.
+     */
+    public static getCurrentProject(): { project: Project; filePath: string } {
+        const csv = sessionStorage.getItem(Project.storageKeys.project);
+        const filePath = sessionStorage.getItem(Project.storageKeys.filepath);
+        if (!csv || !filePath) {
+            throwFatalErr('Internal Error', 'Es ist ein interner Fehler beim laden des aktuellen Projektes aufgetreten.');
+        }
+        return {
+            project: Project.fromCsv(csv),
+            filePath
+        };
+    }
+
     /** Creates a string with the Project info in CSV format. */
-    public toCSV(): string {
+    public toCsv(): string {
         /* --- values will be skipped when parsing the csv back into a Project
          * filling the last 6 cells with --- now makes for an easier logic to
          * create the CSV string. Its also necessary for the splitCSVstring
@@ -113,7 +163,7 @@ export class Project {
             let str = ',,,,,,';
 
             if (this.materials[idx] !== undefined) {
-                str += `"${this.materials[idx].name}","${this.materials[idx].receiptID}",${this.materials[idx].price},`;
+                str += `"${this.materials[idx].name}","${this.materials[idx].receiptId}",${this.materials[idx].price},`;
             } else {
                 str += '---,---,---,';
             }
@@ -136,12 +186,12 @@ export class Project {
      */
     public save(filePath: string, opts?: SaveProjectOptions): Promise<string> {
         return new Promise((resolve) => {
-            const csv = opts?.otherCsv ?? this.toCSV();
+            const csv = opts?.otherCsv ?? this.toCsv();
             if (!csv) { //TODO: Testing required if this fixes #55
                 throwFatalErr('Interner Fehler', 'Konnte das Projekt nicht speichern. Bitte App neu laden');
             }
-            sessionStorage.setItem(Project.storageKeys.PROJECT, csv);
-            sessionStorage.setItem(Project.storageKeys.FILEPATH, filePath);
+            sessionStorage.setItem(Project.storageKeys.project, csv);
+            sessionStorage.setItem(Project.storageKeys.filepath, filePath);
             if (opts?.skipDisk === true) resolve(csv);
             else {
                 writeFile(filePath, csv, { encoding: 'utf8' }, (error) => {
@@ -150,55 +200,5 @@ export class Project {
                 });
             }
         });
-    }
-
-    /** Parses a string (e.g. read from a CSV file) into a new Project instance. */
-    public static fromCSV(source: string): Project {
-        const data = splitCSVstring(source).slice(12);
-        const project = new Project({
-            name: data[1],
-            date: data[2],
-            place: data[3],
-            description: data[4],
-            brutto: parseFloat(data[5]),
-            shouldGenID: false
-        });
-        project.id = data[0];
-
-        const matAndWorkersArray = data.slice(12);
-        for (let idx = 0; idx < matAndWorkersArray.length; idx += 6) {
-            if (matAndWorkersArray[idx] !== '---') {
-                project.materials.push({
-                    name: matAndWorkersArray[idx],
-                    receiptID: matAndWorkersArray[idx + 1],
-                    price: matAndWorkersArray[idx + 2]
-                });
-            }
-            if (matAndWorkersArray[idx + 3] !== '---') {
-                project.workers.push({
-                    type: matAndWorkersArray[idx + 3],
-                    numHours: parseFloat(matAndWorkersArray[idx + 4]),
-                    wage: parseFloat(matAndWorkersArray[idx + 5])
-                });
-            }
-        }
-
-        return project;
-    }
-
-    /**
-     * Returns the current project saved in session storage and the location
-     * of the project file. If one of them is not found, throws an fatal error.
-     */
-    public static getCurrentProject(): { project: Project, filePath: string } {
-        const csv = sessionStorage.getItem(Project.storageKeys.PROJECT);
-        const filePath = sessionStorage.getItem(Project.storageKeys.FILEPATH);
-        if (!csv || !filePath) {
-            throwFatalErr('Internal Error', 'Es ist ein interner Fehler beim laden des aktuellen Projektes aufgetreten.');
-        }
-        return {
-            project: Project.fromCSV(csv),
-            filePath
-        };
     }
 }

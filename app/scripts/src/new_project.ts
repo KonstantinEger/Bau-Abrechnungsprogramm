@@ -57,7 +57,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         place: placeInput.value,
         description: sanitize(notesInput.value),
         brutto: 0,
-        shouldGenID: true
+        shouldGenId: true
     });
 
     window.opener.postMessage({

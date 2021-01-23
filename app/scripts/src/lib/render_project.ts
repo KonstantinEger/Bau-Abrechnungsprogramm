@@ -145,10 +145,10 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
     };
 }
 
-enum MatColumnIDs {
-    Name = 0,
-    Receipt = 1,
-    Price = 2
+enum MatColumnIds {
+    NAME = 0,
+    RECEIPT = 1,
+    PRICE = 2
 }
 
 /** Renders **only** the materials table. (no footer) */
@@ -162,11 +162,11 @@ export function renderMatCol(project: Project): void {
         const td2 = document.createElement('td');
         const td3 = document.createElement('td');
         td1.textContent = mat.name;
-        td2.textContent = mat.receiptID;
+        td2.textContent = mat.receiptId;
         td3.textContent = mat.price;
-        td1.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Name));
-        td2.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Receipt));
-        td3.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Price));
+        td1.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.NAME));
+        td2.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.RECEIPT));
+        td3.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.PRICE));
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
@@ -178,15 +178,15 @@ export function renderMatCol(project: Project): void {
  * Event handler for a Material table cell, which when called, turns the
  * contents of the cell into an HTMLInputElement for editing.
  */
-function setupMatEditInput(rowIdx: number, colID: MatColumnIDs) {
+function setupMatEditInput(rowIdx: number, colId: MatColumnIds) {
     return (event: MouseEvent) => {
         const eventTarget = event.target as HTMLTableDataCellElement;
         const oldVal = eventTarget.textContent;
         if (!oldVal) return;
         const inputEl = document.createElement('input');
         inputEl.value = oldVal;
-        if (colID === MatColumnIDs.Price) inputEl.type = 'number';
-        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colID));
+        if (colId === MatColumnIds.PRICE) inputEl.type = 'number';
+        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colId));
         eventTarget.innerHTML = '';
         eventTarget.appendChild(inputEl);
     };
@@ -199,7 +199,7 @@ function setupMatEditInput(rowIdx: number, colID: MatColumnIDs) {
  * alerted with an error and saving is aborted. If not, the whole column (also
  * bill) is re-rendered, meaning the input field is converted back into text.
  */
-function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
+function editInputHandlerForCell(rowIdx: number, colId: MatColumnIds) {
     return async (event: KeyboardEvent) => {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
@@ -211,16 +211,16 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
             return;
         }
         const { filePath, project } = Project.getCurrentProject();
-        switch (colID) {
-            case MatColumnIDs.Name: {
+        switch (colId) {
+            case MatColumnIds.NAME: {
                 project.materials[rowIdx].name = newValue;
                 break;
             }
-            case MatColumnIDs.Receipt: {
-                project.materials[rowIdx].receiptID = newValue;
+            case MatColumnIds.RECEIPT: {
+                project.materials[rowIdx].receiptId = newValue;
                 break;
             }
-            case MatColumnIDs.Price: {
+            case MatColumnIds.PRICE: {
                 project.materials[rowIdx].price = newValue;
                 break;
             }
@@ -241,9 +241,9 @@ export function renderWorkersCol(project: Project): void {
         const eventTarget = event.target as HTMLInputElement;
         const newValue = parseFloat(eventTarget.value);
         const { project: currentProject, filePath } = Project.getCurrentProject();
-        const listID = parseInt(eventTarget.id);
-        currentProject.workers[listID].numHours += newValue;
-        if (currentProject.workers[listID].numHours < 0) {
+        const listId = parseInt(eventTarget.id);
+        currentProject.workers[listId].numHours += newValue;
+        if (currentProject.workers[listId].numHours < 0) {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
         }

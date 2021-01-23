@@ -5,11 +5,11 @@ import { ipcRenderer as ipc } from 'electron';
 import { openProjectDialog } from './lib/open_project_dialog';
 
 export interface MessageData {
-    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE',
-    project?: Project,
-    filePath?: string,
-    material?: Material,
-    worker?: Worker
+    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE';
+    project?: Project;
+    filePath?: string;
+    material?: Material;
+    worker?: Worker;
 }
 
 (() => {
@@ -25,7 +25,7 @@ export interface MessageData {
                 brutto: data.project.brutto,
                 materials: data.project.materials,
                 workers: data.project.workers,
-                shouldGenID: false
+                shouldGenId: false
             });
             project.id = data.project.id;
             await project.save(data.filePath);
@@ -35,7 +35,7 @@ export interface MessageData {
             const { filePath, project } = Project.getCurrentProject();
             project.materials.push({
                 name: data.material.name,
-                receiptID: data.material.receiptID,
+                receiptId: data.material.receiptId,
                 price: data.material.price
             });
             await project.save(filePath);
