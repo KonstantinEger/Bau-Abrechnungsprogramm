@@ -83,6 +83,17 @@
         "semi": ["error", "always"],
         "@typescript-eslint/array-type": ["error", { "default": "array" }],
         "@typescript-eslint/consistent-type-imports": "error",
-        "@typescript-eslint/explicit-module-boundary-types": "warn"
+        "@typescript-eslint/explicit-module-boundary-types": "warn",
+        "@typescript-eslint/member-delimiter-style": "error",
+        "@typescript-eslint/member-ordering": "warn",
+        "@typescript-eslint/method-signature-style": ["error", "method"],
+        "@typescript-eslint/naming-convention": [
+            "error",
+            { "selector": "default", "format": ["strictCamelCase"] },
+            { "selector": "variable", "format": ["strictCamelCase", "UPPER_CASE"], "modifiers": ["const"] },
+            { "selector": "parameter", "format": ["strictCamelCase"], "modifiers": ["unused"], "leadingUnderscore": "require" },
+            { "selector": "typeLike", "format": ["StrictPascalCase"], "leadingUnderscore": "allow" },
+            { "selector": "enumMember", "format": ["UPPER_CASE"] }
+        ]
     }
 }
