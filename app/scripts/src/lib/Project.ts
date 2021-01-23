@@ -74,6 +74,11 @@ interface SaveProjectOptions {
 }
 
 export class Project {
+    private static storageKeys = {
+        PROJECT: 'CURRENT_PROJ',
+        FILEPATH: 'CURRENT_PROJ_LOC'
+    } as const;
+
     public id: string;
     public name: string;
     public date: string;
@@ -135,8 +140,8 @@ export class Project {
             if (!csv) { //TODO: Testing required if this fixes #55
                 throwFatalErr('Interner Fehler', 'Konnte das Projekt nicht speichern. Bitte App neu laden');
             }
-            sessionStorage.setItem('CURRENT_PROJ', csv);
-            sessionStorage.setItem('CURRENT_PROJ_LOC', filePath);
+            sessionStorage.setItem(Project.storageKeys.PROJECT, csv);
+            sessionStorage.setItem(Project.storageKeys.FILEPATH, filePath);
             if (opts?.skipDisk === true) resolve(csv);
             else {
                 writeFile(filePath, csv, { encoding: 'utf8' }, (error) => {
@@ -186,8 +191,8 @@ export class Project {
      * of the project file. If one of them is not found, throws an fatal error.
      */
     public static getCurrentProject(): { project: Project, filePath: string } {
-        const csv = sessionStorage.getItem('CURRENT_PROJ');
-        const filePath = sessionStorage.getItem('CURRENT_PROJ_LOC');
+        const csv = sessionStorage.getItem(Project.storageKeys.PROJECT);
+        const filePath = sessionStorage.getItem(Project.storageKeys.FILEPATH);
         if (!csv || !filePath) {
             throwFatalErr('Internal Error', 'Es ist ein interner Fehler beim laden des aktuellen Projektes aufgetreten.');
         }
