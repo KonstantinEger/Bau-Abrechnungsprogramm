@@ -28,7 +28,7 @@ export interface MessageData {
                 shouldGenID: false
             });
             project.id = data.project.id;
-            await project.save(data.filePath, { skipDisk: true });
+            await project.save(data.filePath);
             renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
             if (!data.material) return;
