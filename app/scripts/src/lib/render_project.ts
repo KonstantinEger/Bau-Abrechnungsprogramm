@@ -1,7 +1,6 @@
 import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './Project';
-import { promises as fs } from 'fs';
 import projectTemplate from '../../../project_template.html';
 
 /**
@@ -26,25 +25,15 @@ export async function renderProject(project: Project): Promise<void> {
         if (!inputValue) return;
         const { filePath, project: currentProject } = Project.getCurrentProject();
         currentProject.brutto = parseFloat(inputValue);
+        await currentProject.save(filePath);
         renderBillCol(currentProject);
-        const newCSV = currentProject.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
         const { filePath, project: currentProject } = Project.getCurrentProject();
         currentProject.descr = sanitize(inputValue);
-        const newCSV = currentProject.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await currentProject.save(filePath);
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
     $('#add-new-material-btn').onclick = () => {
@@ -151,20 +140,15 @@ function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Proj
             return;
         }
         project[elementType] = newVal;
-        const projectCSV = project.saveToSessionStorage();
-        try {
-            await fs.writeFile(projectFilePath, projectCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await project.save(projectFilePath);
         renderHeader(project);
     };
 }
 
-enum MatColumnIDs {
-    Name = 0,
-    Receipt = 1,
-    Price = 2
+enum MatColumnIds {
+    NAME = 0,
+    RECEIPT = 1,
+    PRICE = 2
 }
 
 /** Renders **only** the materials table. (no footer) */
@@ -178,11 +162,11 @@ export function renderMatCol(project: Project): void {
         const td2 = document.createElement('td');
         const td3 = document.createElement('td');
         td1.textContent = mat.name;
-        td2.textContent = mat.receiptID;
+        td2.textContent = mat.receiptId;
         td3.textContent = mat.price;
-        td1.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Name));
-        td2.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Receipt));
-        td3.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIDs.Price));
+        td1.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.NAME));
+        td2.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.RECEIPT));
+        td3.addEventListener('dblclick', setupMatEditInput(idx, MatColumnIds.PRICE));
         tr.appendChild(td1);
         tr.appendChild(td2);
         tr.appendChild(td3);
@@ -194,15 +178,15 @@ export function renderMatCol(project: Project): void {
  * Event handler for a Material table cell, which when called, turns the
  * contents of the cell into an HTMLInputElement for editing.
  */
-function setupMatEditInput(rowIdx: number, colID: MatColumnIDs) {
+function setupMatEditInput(rowIdx: number, colId: MatColumnIds) {
     return (event: MouseEvent) => {
         const eventTarget = event.target as HTMLTableDataCellElement;
         const oldVal = eventTarget.textContent;
         if (!oldVal) return;
         const inputEl = document.createElement('input');
         inputEl.value = oldVal;
-        if (colID === MatColumnIDs.Price) inputEl.type = 'number';
-        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colID));
+        if (colId === MatColumnIds.PRICE) inputEl.type = 'number';
+        inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colId));
         eventTarget.innerHTML = '';
         eventTarget.appendChild(inputEl);
     };
@@ -215,7 +199,7 @@ function setupMatEditInput(rowIdx: number, colID: MatColumnIDs) {
  * alerted with an error and saving is aborted. If not, the whole column (also
  * bill) is re-rendered, meaning the input field is converted back into text.
  */
-function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
+function editInputHandlerForCell(rowIdx: number, colId: MatColumnIds) {
     return async (event: KeyboardEvent) => {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
@@ -227,26 +211,21 @@ function editInputHandlerForCell(rowIdx: number, colID: MatColumnIDs) {
             return;
         }
         const { filePath, project } = Project.getCurrentProject();
-        switch (colID) {
-            case MatColumnIDs.Name: {
+        switch (colId) {
+            case MatColumnIds.NAME: {
                 project.materials[rowIdx].name = newValue;
                 break;
             }
-            case MatColumnIDs.Receipt: {
-                project.materials[rowIdx].receiptID = newValue;
+            case MatColumnIds.RECEIPT: {
+                project.materials[rowIdx].receiptId = newValue;
                 break;
             }
-            case MatColumnIDs.Price: {
+            case MatColumnIds.PRICE: {
                 project.materials[rowIdx].price = newValue;
                 break;
             }
         }
-        const newCSV = project.saveToSessionStorage();
-        try {
-            await fs.writeFile(filePath, newCSV);
-        } catch (err) {
-            throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-        }
+        await project.save(filePath);
         renderMatCol(project);
         renderBillCol(project);
     };
@@ -257,22 +236,20 @@ export function renderWorkersCol(project: Project): void {
     const table = $('#workers-table');
     table.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th></th></tr>';
 
-    const keyUpHandler = (event: KeyboardEvent) => {
+    const keyUpHandler = async (event: KeyboardEvent) => {
         if (event.code !== 'Enter') return;
         const eventTarget = event.target as HTMLInputElement;
         const newValue = parseFloat(eventTarget.value);
         const { project: currentProject, filePath } = Project.getCurrentProject();
-        const listID = parseInt(eventTarget.id);
-        currentProject.workers[listID].numHours += newValue;
-        if (currentProject.workers[listID].numHours < 0) {
+        const listId = parseInt(eventTarget.id);
+        currentProject.workers[listId].numHours += newValue;
+        if (currentProject.workers[listId].numHours < 0) {
             throwErr('Fehler', 'Stundenanzahl kann nicht unter 0 sinken.');
             return;
         }
+        await project.save(filePath);
         renderWorkersCol(currentProject);
         renderBillCol(currentProject);
-        const newCSV = currentProject.saveToSessionStorage();
-        fs.writeFile(filePath, newCSV)
-            .catch((err) => throwFatalErr(`FS-Fehler [${err.code}]`, err.message));
     };
 
     for (const [idx, data] of project.workers.entries()) {

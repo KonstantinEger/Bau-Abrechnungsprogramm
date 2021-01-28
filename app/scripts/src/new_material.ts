@@ -40,7 +40,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
         name: 'NEW_MATERIAL',
         material: {
             name: nameInput.value,
-            receiptID: receiptIdInput.value,
+            receiptId: receiptIdInput.value,
             price: priceInput.value
         } as Material
     } as MessageData);

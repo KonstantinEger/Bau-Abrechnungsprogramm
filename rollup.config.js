@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import del from 'rollup-plugin-delete';
 import html from 'rollup-plugin-html';
 import { join } from 'path';

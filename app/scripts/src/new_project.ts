@@ -1,9 +1,8 @@
 import * as remote from '@electron/remote';
 import { isInvalid, sanitize } from './lib/utils';
-import { throwErr, throwFatalErr } from './lib/errors';
 import type { MessageData } from '.';
 import { Project } from './lib/Project';
-import { promises as fs } from 'fs';
+import { throwErr } from './lib/errors';
 
 document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const nameInput = document.getElementById('project-name-input') as HTMLInputElement;
@@ -58,14 +57,8 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         place: placeInput.value,
         description: sanitize(notesInput.value),
         brutto: 0,
-        shouldGenID: true
+        shouldGenId: true
     });
-
-    try {
-        await fs.writeFile(filePath, project.toCSV());
-    } catch (err) {
-        throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-    }
 
     window.opener.postMessage({
         name: 'NEW_PROJECT',

@@ -1,17 +1,15 @@
 import * as renderFns from './lib/render_project';
 import type { Material, Worker } from './lib/Project';
 import { Project } from './lib/Project';
-import { promises as fs } from 'fs';
 import { ipcRenderer as ipc } from 'electron';
 import { openProjectDialog } from './lib/open_project_dialog';
-import { throwFatalErr } from './lib/errors';
 
 export interface MessageData {
-    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE',
-    project?: Project,
-    filePath?: string,
-    material?: Material,
-    worker?: Worker
+    name: 'NEW_PROJECT' | 'NEW_MATERIAL' | 'NEW_WORKER_TYPE';
+    project?: Project;
+    filePath?: string;
+    material?: Material;
+    worker?: Worker;
 }
 
 (() => {
@@ -27,25 +25,20 @@ export interface MessageData {
                 brutto: data.project.brutto,
                 materials: data.project.materials,
                 workers: data.project.workers,
-                shouldGenID: false
+                shouldGenId: false
             });
             project.id = data.project.id;
-            project.saveToSessionStorage({ filePath: data.filePath });
+            await project.save(data.filePath);
             renderFns.renderProject(project);
         } else if (data.name === 'NEW_MATERIAL') {
             if (!data.material) return;
             const { filePath, project } = Project.getCurrentProject();
             project.materials.push({
                 name: data.material.name,
-                receiptID: data.material.receiptID,
+                receiptId: data.material.receiptId,
                 price: data.material.price
             });
-            const newCSV = project.saveToSessionStorage();
-            try {
-                await fs.writeFile(filePath, newCSV);
-            } catch (err) {
-                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-            }
+            await project.save(filePath);
             renderFns.renderMatCol(project);
             renderFns.renderBillCol(project);
         } else if (data.name === 'NEW_WORKER_TYPE') {
@@ -56,12 +49,7 @@ export interface MessageData {
                 numHours: data.worker.numHours,
                 wage: data.worker.wage
             });
-            const newCSV = project.saveToSessionStorage();
-            try {
-                await fs.writeFile(filePath, newCSV);
-            } catch (err) {
-                throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
-            }
+            await project.save(filePath);
             renderFns.renderWorkersCol(project);
             renderFns.renderBillCol(project);
         }
