@@ -187,8 +187,10 @@ function setupMatEditInput(rowIdx: number, colId: MatColumnIds) {
         inputEl.value = oldVal;
         if (colId === MatColumnIds.PRICE) inputEl.type = 'number';
         inputEl.addEventListener('keyup', editInputHandlerForCell(rowIdx, colId));
+        inputEl.addEventListener('blur', () => { eventTarget.textContent = oldVal; });
         eventTarget.innerHTML = '';
         eventTarget.appendChild(inputEl);
+        inputEl.focus();
     };
 }
 

@@ -39,7 +39,7 @@
         "max-lines": ["warn", 400],
         "max-params": ["warn", 3],
         "max-nested-callbacks": ["warn", 2],
-        "max-statements-per-line": ["warn", { "max": 1 }],
+        "max-statements-per-line": ["warn", { "max": 2 }],
         "new-cap": "error",
         "new-parens": "error",
         "no-alert": "error",
