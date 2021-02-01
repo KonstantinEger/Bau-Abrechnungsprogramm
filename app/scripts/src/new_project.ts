@@ -1,7 +1,7 @@
 import * as remote from '@electron/remote';
-import { isInvalid, sanitize } from './lib/utils';
 import type { MessageData } from '.';
 import { Project } from './lib/Project';
+import { Validation } from './lib/utils';
 import { throwErr } from './lib/errors';
 
 document.getElementById('submit-btn')?.addEventListener('click', async () => {
@@ -16,12 +16,12 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
     /* input validation */
     {
         let exitDueToError = false;
-        if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
+        if (nameInput.value.length === 0 || Validation.isInvalid(nameInput.value)) {
             nameInput.classList.add('invalid');
             exitDueToError = true;
         }
 
-        if (placeInput.value.length === 0 || isInvalid(placeInput.value)) {
+        if (placeInput.value.length === 0 || Validation.isInvalid(placeInput.value)) {
             placeInput.classList.add('invalid');
             exitDueToError = true;
         }
@@ -55,7 +55,7 @@ document.getElementById('submit-btn')?.addEventListener('click', async () => {
         name: nameInput.value,
         date: dateInput.value,
         place: placeInput.value,
-        description: sanitize(notesInput.value),
+        description: Validation.sanitize(notesInput.value),
         brutto: 0,
         shouldGenId: true
     });

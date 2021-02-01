@@ -73,6 +73,10 @@ interface SaveProjectOptions {
     otherCsv?: string;
 }
 
+/**
+ * Class representing a project object. Combines functionality to parse and
+ * save the project to disk in csv format.
+ */
 export class Project {
     private static storageKeys = {
         project: 'CURRENT_PROJ',
@@ -88,6 +92,7 @@ export class Project {
     public materials: Material[];
     public workers: Worker[];
 
+    /** Constructs a new `Project` instance */
     public constructor(params: ProjectConstructorParams) {
         this.id = params.shouldGenId ? genId() : '';
         this.name = params.name;

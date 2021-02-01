@@ -33,7 +33,7 @@
         "indent": ["error", 4, { "SwitchCase": 1 }],
         "key-spacing": ["warn", { "mode": "strict" }],
         "keyword-spacing": "error",
-        "line-comment-position": ["warn", { "position": "beside" }],
+        "line-comment-position": "off",
         "max-depth": ["warn", 3],
         "max-len": ["warn", { "code": 130, "ignoreComments": true }],
         "max-lines": ["warn", 400],
@@ -76,7 +76,13 @@
         "prefer-promise-reject-errors": "error",
         "prefer-template": "warn",
         "quotes": ["error", "single"],
-        "require-jsdoc": "warn",
+        "require-jsdoc": ["warn", {
+            "require": {
+                "FunctionDeclaration": true,
+                "MethodDefinition": true,
+                "ClassDeclaration": true
+            }
+        }],
         "sort-imports": "warn",
         "valid-jsdoc": "off",
         "yoda": ["warn", "never"],
