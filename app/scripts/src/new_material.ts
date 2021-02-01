@@ -1,6 +1,6 @@
 import type { Material } from './lib/Project';
 import type { MessageData } from '.';
-import { isInvalid } from './lib/utils';
+import { Validation } from './lib/utils';
 import { throwErr } from './lib/errors';
 
 document.getElementById('mat-name-input')?.focus();
@@ -15,12 +15,12 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
 
     {
         let exitDueToError = false;
-        if (nameInput.value.length === 0 || isInvalid(nameInput.value)) {
+        if (nameInput.value.length === 0 || Validation.isInvalid(nameInput.value)) {
             nameInput.classList.add('invalid');
             exitDueToError = true;
         }
 
-        if (receiptIdInput.value.length === 0 || isInvalid(receiptIdInput.value)) {
+        if (receiptIdInput.value.length === 0 || Validation.isInvalid(receiptIdInput.value)) {
             receiptIdInput.classList.add('invalid');
             exitDueToError = true;
         }

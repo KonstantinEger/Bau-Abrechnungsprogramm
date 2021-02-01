@@ -1,6 +1,6 @@
 import type { MessageData } from '.';
+import { Validation } from './lib/utils';
 import type { Worker } from './lib/Project';
-import { isInvalid } from './lib/utils';
 import { throwErr } from './lib/errors';
 
 document.getElementById('type-name-input')?.focus();
@@ -15,7 +15,7 @@ document.getElementById('submit-btn')?.addEventListener('click', () => {
 
     {
         let exitDueToError = false;
-        if (typeInput.value.length === 0 || isInvalid(typeInput.value)) {
+        if (typeInput.value.length === 0 || Validation.isInvalid(typeInput.value)) {
             typeInput.classList.add('invalid');
             exitDueToError = true;
         }

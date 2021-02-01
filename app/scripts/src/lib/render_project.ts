@@ -1,4 +1,4 @@
-import { debounceEvent, desanitize, isInvalid, sanitize } from './utils';
+import { Events, Validation } from './utils';
 import { throwErr, throwFatalErr } from './errors';
 import { Project } from './Project';
 import projectTemplate from '../../../project_template.html';
@@ -20,7 +20,7 @@ export async function renderProject(project: Project): Promise<void> {
     renderWorkersCol(project);
     renderBillCol(project);
 
-    $('#brutto-bill-input').oninput = debounceEvent(750, async (event: InputEvent) => {
+    $('#brutto-bill-input').oninput = Events.debounce(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLInputElement).value;
         if (!inputValue) return;
         const { filePath, project: currentProject } = Project.getCurrentProject();
@@ -29,10 +29,10 @@ export async function renderProject(project: Project): Promise<void> {
         renderBillCol(currentProject);
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
-    $('#notes-input').oninput = debounceEvent(750, async (event: InputEvent) => {
+    $('#notes-input').oninput = Events.debounce(750, async (event: InputEvent) => {
         const inputValue = (event.target as HTMLTextAreaElement).value;
         const { filePath, project: currentProject } = Project.getCurrentProject();
-        currentProject.descr = sanitize(inputValue);
+        currentProject.descr = Validation.sanitize(inputValue);
         await currentProject.save(filePath);
     }) as (this: GlobalEventHandlers, ev: Event) => unknown;
 
@@ -80,7 +80,7 @@ function renderHeader(project: Project, opts?: RenderHeaderOptions): void {
     placeDisplay.textContent = project.place;
     const dateIntlOptions = { day: 'numeric', month: 'long', year: 'numeric' };
     dateDisplay.textContent = new Date(project.date).toLocaleDateString('de-DE', dateIntlOptions);
-    descrInput.value = desanitize(project.descr);
+    descrInput.value = Validation.desanitize(project.descr);
     if (opts?.addDblclickListeners === true) {
         nameDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.NAME));
         placeDisplay.addEventListener('dblclick', setupHeaderEditInputs(HeaderDisplayType.PLACE));
@@ -113,7 +113,11 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
                 inputEl.value = project.date;
                 break;
         }
-        inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
+        if (elementType === HeaderDisplayType.DATE) {
+            inputEl.addEventListener('keypress', editInputHandlerForHeader(elementType, project, filePath));
+        } else {
+            inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
+        }
         inputEl.addEventListener('blur', () => {
             eventTarget.textContent = oldValue;
         });
@@ -130,11 +134,12 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
  * be out of sync by then. Calls a re-render of the header at the end.
  */
 function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Project, projectFilePath: string) {
-    return async (event: Event) => {
+    return async (event: Event | KeyboardEvent) => {
+        if (Events.isKeyboardEvent(event) && event.code !== 'Enter') return;
         const inputEl = event.target as HTMLInputElement;
         inputEl.classList.remove('invalid');
         const newVal = inputEl.value;
-        if (!newVal || isInvalid(newVal)) {
+        if (!newVal || Validation.isInvalid(newVal)) {
             inputEl.classList.add('invalid');
             throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
             return;
@@ -207,7 +212,7 @@ function editInputHandlerForCell(rowIdx: number, colId: MatColumnIds) {
         const eventTarget = event.target as HTMLInputElement;
         eventTarget.classList.remove('invalid');
         const newValue = eventTarget.value;
-        if (!newValue || isInvalid(newValue)) {
+        if (!newValue || Validation.isInvalid(newValue)) {
             eventTarget.classList.add('invalid');
             throwErr('Eingabefehler', 'Feld darf nicht leer sein und darf keine , oder " enthalten.');
             return;
