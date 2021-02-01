@@ -113,11 +113,7 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
                 inputEl.value = project.date;
                 break;
         }
-        if (elementType === HeaderDisplayType.DATE) {
-            inputEl.addEventListener('keypress', editInputHandlerForHeader(elementType, project, filePath));
-        } else {
-            inputEl.addEventListener('change', editInputHandlerForHeader(elementType, project, filePath));
-        }
+        inputEl.addEventListener('keypress', editInputHandlerForHeader(elementType, project, filePath));
         inputEl.addEventListener('blur', () => {
             eventTarget.textContent = oldValue;
         });
@@ -134,8 +130,8 @@ function setupHeaderEditInputs(elementType: HeaderDisplayType) {
  * be out of sync by then. Calls a re-render of the header at the end.
  */
 function editInputHandlerForHeader(elementType: HeaderDisplayType, project: Project, projectFilePath: string) {
-    return async (event: Event | KeyboardEvent) => {
-        if (Events.isKeyboardEvent(event) && event.code !== 'Enter') return;
+    return async (event: KeyboardEvent) => {
+        if (event.code !== 'Enter') return;
         const inputEl = event.target as HTMLInputElement;
         inputEl.classList.remove('invalid');
         const newVal = inputEl.value;

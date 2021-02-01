@@ -24,11 +24,6 @@ export abstract class Validation {
 
 /** Namespace for utility methods regarding Events */
 export abstract class Events {
-    /** Checks if a given variable is of type `KeyboardEvent`. */
-    public static isKeyboardEvent(event: unknown): event is KeyboardEvent {
-        return event instanceof KeyboardEvent;
-    }
-
     /**
      * Delays the firing of a event handler. **Note**: If the handler gets called
      * multiple times _within_ the delay time period, only the _last one_ will
