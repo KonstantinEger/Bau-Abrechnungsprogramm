@@ -6,8 +6,9 @@ export type State = {
     fileLocation?: string;
 };
 
-/** Callbacks fired when the AppState state changes. */
-export type StateChangeListener = (s: State) => void;
+type EventNames = 'new-project' | 'statechange';
+
+type CustomEventListener = (state: State, ...args: unknown[]) => void;
 
 /**
  * WebComponent to contain app state. To `get` the current state,
@@ -18,7 +19,7 @@ export type StateChangeListener = (s: State) => void;
 export class AppState extends HTMLElement {
     public static readonly selector = 'app-state';
     private _state: State = {};
-    private _listeners: StateChangeListener[] = [];
+    private _listeners: Map<EventNames, CustomEventListener[]> = new Map();
 
     /** Get the current state. */
     public get state(): State {
@@ -28,12 +29,23 @@ export class AppState extends HTMLElement {
     /** Set the current state. */
     public set state(newState: State) {
         this._state = newState;
-        this._listeners.forEach((listener) => listener(newState));
+        this.fireCustomEvent('statechange');
     }
 
-    /** Add a new state change listener. */
-    public set onstatechange(callback: StateChangeListener) {
-        this._listeners.push(callback);
+    /** Publish a custom event to all its listeners. */
+    public fireCustomEvent(event: EventNames, ...args: unknown[]): void {
+        if (this._listeners.has(event)) {
+            this._listeners.get(event)?.forEach((listener) => listener(this._state, ...args));
+        }
+    }
+
+    /** Add an event listener for custom events. */
+    public addCustomEventListener(event: EventNames, listener: CustomEventListener): void {
+        if (this._listeners.has(event)) {
+            this._listeners.get(event)?.push(listener);
+        } else {
+            this._listeners.set(event, [listener]);
+        }
     }
 }
 

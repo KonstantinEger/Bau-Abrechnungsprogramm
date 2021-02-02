@@ -1,7 +1,7 @@
-import './components/AppState';
-import * as renderFns from './lib/render_project';
 import type { Material, Worker } from './lib/Project';
+import { AppState } from './components/AppState';
 import { Project } from './lib/Project';
+import { ProjectView } from './components/ProjectView';
 import { ipcRenderer as ipc } from 'electron';
 import { openProjectDialog } from './lib/open_project_dialog';
 
@@ -14,7 +14,20 @@ export interface MessageData {
 }
 
 (() => {
-    window.onmessage = async ({ data }: { data: MessageData }) => {
+    const stateElement = document.querySelector<AppState>(AppState.selector);
+    if (!stateElement) {
+        console.warn('app-state not defined');
+        return;
+    }
+    stateElement.addCustomEventListener('new-project', () => {
+        const appContainer = document.querySelector<HTMLDivElement>('#app');
+        if (!appContainer) return;
+        appContainer.innerHTML = '';
+        const projectView = document.createElement(ProjectView.selector) as ProjectView;
+        appContainer.appendChild(projectView);
+    });
+
+    window.onmessage = ({ data }: { data: MessageData }) => {
         if (data.name === 'NEW_PROJECT') {
             if (!data.project || !data.filePath) return;
             const project = new Project({
@@ -28,52 +41,33 @@ export interface MessageData {
                 shouldGenId: false
             });
             project.id = data.project.id;
-            await project.save(data.filePath);
-            renderFns.renderProject(project);
-        } else if (data.name === 'NEW_MATERIAL') {
-            if (!data.material) return;
-            const { filePath, project } = Project.getCurrentProject();
-            project.materials.push({
-                name: data.material.name,
-                receiptId: data.material.receiptId,
-                price: data.material.price
-            });
-            await project.save(filePath);
-            renderFns.renderMatCol(project);
-            renderFns.renderBillCol(project);
-        } else if (data.name === 'NEW_WORKER_TYPE') {
-            if (!data.worker) return;
-            const { filePath, project } = Project.getCurrentProject();
-            project.workers.push({
-                type: data.worker.type,
-                numHours: data.worker.numHours,
-                wage: data.worker.wage
-            });
-            await project.save(filePath);
-            renderFns.renderWorkersCol(project);
-            renderFns.renderBillCol(project);
+            stateElement.state = { fileLocation: data.filePath, project };
+            stateElement.fireCustomEvent('new-project');
         }
     };
-
-    document.querySelector('#btn-new')?.addEventListener('click', () => {
-        window.open('./new_project.html', '_blank', 'width=800,height=600');
-    });
-
-    document.querySelector('#btn-open')?.addEventListener('click', () => {
-        openProjectDialog().then((proj) => {
-            if (!proj) return;
-            renderFns.renderProject(proj);
-        });
-    });
 })();
+
+document.querySelector('#btn-new')?.addEventListener('click', () => {
+    window.open('./new_project.html', '_blank', 'width=800,height=600');
+});
+
+document.querySelector('#btn-open')?.addEventListener('click', () => {
+    openProjectDialog().then(handleOpenDialogResponse);
+});
 
 ipc.on('open:new-project-dialog', () => {
     window.open('./new_project.html', '_blank', 'width=800,height=600');
 });
 
 ipc.on('open:open-project-dialog', () => {
-    openProjectDialog().then((proj) => {
-        if (!proj) return;
-        renderFns.renderProject(proj);
-    });
+    openProjectDialog().then(handleOpenDialogResponse);
 });
+
+/** Handle responses from the open-project-dialog */
+function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation: string }) {
+    if (!projAndLoc) return;
+    const stateElement = document.querySelector<AppState>(AppState.selector);
+    if (!stateElement) return;
+    stateElement.state = projAndLoc;
+    stateElement.fireCustomEvent('new-project');
+}
