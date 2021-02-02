@@ -70,7 +70,7 @@ export class ProjectHeaderView extends HTMLElement {
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));
 
-        const state = $<AppState>('#app-state').state;
+        const state = $<AppState>('app-state').state;
 
         const fallback = 'Fehler';
         $('#project-name-display', shadow).textContent = state.project?.name ?? fallback;
