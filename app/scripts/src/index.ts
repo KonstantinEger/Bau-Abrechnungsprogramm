@@ -1,3 +1,4 @@
+import './components/AppState';
 import * as renderFns from './lib/render_project';
 import type { Material, Worker } from './lib/Project';
 import { Project } from './lib/Project';
@@ -13,7 +14,6 @@ export interface MessageData {
 }
 
 (() => {
-
     window.onmessage = async ({ data }: { data: MessageData }) => {
         if (data.name === 'NEW_PROJECT') {
             if (!data.project || !data.filePath) return;

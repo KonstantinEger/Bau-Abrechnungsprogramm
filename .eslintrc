@@ -96,6 +96,7 @@
         "@typescript-eslint/naming-convention": [
             "error",
             { "selector": "default", "format": ["strictCamelCase"] },
+            { "selector": "classProperty", "format": ["strictCamelCase"], "modifiers": ["private"], "leadingUnderscore": "allow" },
             { "selector": "variable", "format": ["strictCamelCase", "UPPER_CASE"], "modifiers": ["const"] },
             { "selector": "parameter", "format": ["strictCamelCase"], "modifiers": ["unused"], "leadingUnderscore": "require" },
             { "selector": "typeLike", "format": ["StrictPascalCase"], "leadingUnderscore": "allow" },

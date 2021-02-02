@@ -10,10 +10,8 @@ import projectTemplate from '../../../project_template.html';
 export async function renderProject(project: Project): Promise<void> {
     if (!project) return;
 
-    document.body.innerHTML = '';
+    $('#app').innerHTML = projectTemplate;
     document.title = `Bau-Abrechnungen | Projekt | ${project.name}`;
-
-    document.body.innerHTML = projectTemplate;
 
     renderHeader(project, { addDblclickListeners: true });
     renderMatCol(project);
