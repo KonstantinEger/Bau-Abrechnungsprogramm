@@ -1,3 +1,5 @@
+import { throwFatalErr } from './errors';
+
 /** Namespace for utility methods regarding string validation and sanitization. */
 export abstract class Validation {
     /**
@@ -20,6 +22,13 @@ export abstract class Validation {
     public static isInvalid(input: string): boolean {
         return (/,|"/g).test(input);
     }
+}
+
+/** Shortcut for `document.querySelector(...)`. Throws a fatal error if not found. */
+export function $<E = HTMLElement>(selector: string, doc?: Document | ShadowRoot): E {
+    const el = (doc ?? document).querySelector(selector) as E | null;
+    if (!el) throwFatalErr('Interner Fehler', `Kann Element ${selector} nicht finden.`);
+    return el;
 }
 
 /** Namespace for utility methods regarding Events */

@@ -1,6 +1,8 @@
+import './ProjectHeaderView';
+
 const template = document.createElement('template');
 template.innerHTML = `
-<project-header></project-header>
+<project-header-view></project-header-view>
 <div class="body-grid-3">
     <materials-view></materials-view>
     <workers-view></workers-view>
