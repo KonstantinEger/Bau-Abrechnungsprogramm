@@ -1,7 +1,16 @@
+import { MaterialsView } from './MaterialsView';
 import { ProjectHeaderView } from './ProjectHeaderView';
 
 const template = document.createElement('template');
 template.innerHTML = `
+<style>
+    .body-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        height: calc(100vh - 103px);
+        border-top: 3px solid var(--primary-color);
+    }
+</style>
 <project-header-view></project-header-view>
 <div class="body-grid-3">
     <materials-view></materials-view>
@@ -23,6 +32,7 @@ export class ProjectView extends HTMLElement {
 
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
+        MaterialsView.define();
         ProjectHeaderView.define();
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));
