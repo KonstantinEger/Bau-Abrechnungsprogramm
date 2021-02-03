@@ -1,4 +1,5 @@
 import type { Material, Worker } from './lib/Project';
+import { $ } from './lib/utils';
 import { AppState } from './components/AppState';
 import { Project } from './lib/Project';
 import { ProjectView } from './components/ProjectView';
@@ -13,15 +14,13 @@ export interface MessageData {
     worker?: Worker;
 }
 
+AppState.define();
+ProjectView.define();
+
 (() => {
-    const stateElement = document.querySelector<AppState>(AppState.selector);
-    if (!stateElement) {
-        console.warn('app-state not defined');
-        return;
-    }
+    const stateElement = $<AppState>(AppState.selector);
     stateElement.addCustomEventListener('new-project', () => {
-        const appContainer = document.querySelector<HTMLDivElement>('#app');
-        if (!appContainer) return;
+        const appContainer = $<HTMLDivElement>('#app');
         appContainer.innerHTML = '';
         const projectView = document.createElement(ProjectView.selector) as ProjectView;
         appContainer.appendChild(projectView);
@@ -66,8 +65,7 @@ ipc.on('open:open-project-dialog', () => {
 /** Handle responses from the open-project-dialog */
 function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation: string }) {
     if (!projAndLoc) return;
-    const stateElement = document.querySelector<AppState>(AppState.selector);
-    if (!stateElement) return;
+    const stateElement = $<AppState>(AppState.selector);
     stateElement.state = projAndLoc;
     stateElement.fireCustomEvent('new-project');
 }

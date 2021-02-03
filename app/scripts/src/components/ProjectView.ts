@@ -1,4 +1,4 @@
-import './ProjectHeaderView';
+import { ProjectHeaderView } from './ProjectHeaderView';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -14,13 +14,17 @@ template.innerHTML = `
 export class ProjectView extends HTMLElement {
     public static readonly selector = 'project-view';
 
+    /** Define this WebComponent in the customElements registry */
+    public static define(): void {
+        if (!customElements.get(ProjectView.selector)) {
+            customElements.define(ProjectView.selector, ProjectView);
+        }
+    }
+
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
-        this.attachShadow({ mode: 'open' });
-        this.shadowRoot?.appendChild(template.content.cloneNode(true));
+        ProjectHeaderView.define();
+        const shadow = this.attachShadow({ mode: 'open' });
+        shadow.appendChild(template.content.cloneNode(true));
     }
-}
-
-if (!customElements.get(ProjectView.selector)) {
-    customElements.define(ProjectView.selector, ProjectView);
 }

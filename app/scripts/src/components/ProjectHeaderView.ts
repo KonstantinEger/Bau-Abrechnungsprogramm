@@ -1,5 +1,6 @@
 import { $ } from '../lib/utils';
-import type { AppState } from './AppState';
+import { AppState } from './AppState';
+import type { Project } from '../lib/Project';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -54,15 +55,29 @@ template.innerHTML = `
 </div>
 `;
 
-/** WebComponent to render the Header in the ProjectView */
+/** WebComponent to render the Header in the ProjectView. */
 export class ProjectHeaderView extends HTMLElement {
     public static readonly selector = 'project-header-view';
 
+    /** Define this WebComponent in the customElements registry. */
+    public static define(): void {
+        if (!customElements.get(ProjectHeaderView.selector)) {
+            customElements.define(ProjectHeaderView.selector, ProjectHeaderView);
+        }
+    }
+
     /** Turns the date string into locale format. */
-    private static formatDateString(str?: string): string | undefined {
-        if (!str) return;
+    private static formatDateString(str: string): string {
         const dateIntlOptions = { day: 'numeric', month: 'long', year: 'numeric' };
         return new Date(str).toLocaleDateString('de-DE', dateIntlOptions);
+    }
+
+    /** Render the project properties. */
+    private static render(shadow: ShadowRoot, project: Project): void {
+        $('#project-name-display', shadow).textContent = project.name;
+        $('#project-place-display', shadow).textContent = project.place;
+        $('#project-date-display', shadow).textContent = ProjectHeaderView.formatDateString(project.date);
+        $<HTMLTextAreaElement>('#notes-input', shadow).value = project.descr;
     }
 
     // eslint-disable-next-line require-jsdoc
@@ -70,16 +85,14 @@ export class ProjectHeaderView extends HTMLElement {
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));
 
-        const state = $<AppState>('app-state').state;
-
-        const fallback = 'Fehler';
-        $('#project-name-display', shadow).textContent = state.project?.name ?? fallback;
-        $('#project-place-display', shadow).textContent = state.project?.place ?? fallback;
-        $('#project-date-display', shadow).textContent = ProjectHeaderView.formatDateString(state.project?.date) ?? fallback;
-        $<HTMLTextAreaElement>('#notes-input', shadow).value = state.project?.descr ?? fallback;
+        const stateElement = $<AppState>(AppState.selector);
+        const state = stateElement.state;
+        if (!state.project) return;
+        ProjectHeaderView.render(shadow, state.project);
+        stateElement.addCustomEventListener('project-updated', (newState) => {
+            if (!newState.project) return;
+            ProjectHeaderView.render(shadow, newState.project);
+        });
     }
-}
 
-if (!customElements.get(ProjectHeaderView.selector)) {
-    customElements.define(ProjectHeaderView.selector, ProjectHeaderView);
 }

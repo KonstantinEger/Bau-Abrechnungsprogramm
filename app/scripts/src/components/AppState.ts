@@ -6,9 +6,9 @@ export type State = {
     fileLocation?: string;
 };
 
-type EventNames = 'new-project' | 'statechange';
+type EventNames = 'new-project' | 'project-updated' | 'statechange';
 
-type CustomEventListener = (state: State, ...args: unknown[]) => void;
+type CustomEventListener = (state: State, opts?: Record<string, unknown>) => void;
 
 /**
  * WebComponent to contain app state. To `get` the current state,
@@ -20,6 +20,13 @@ export class AppState extends HTMLElement {
     public static readonly selector = 'app-state';
     private _state: State = {};
     private _listeners: Map<EventNames, CustomEventListener[]> = new Map();
+
+    /** Defines this WebComponent in the customElement registry. */
+    public static define(): void {
+        if (!customElements.get(AppState.selector)) {
+            customElements.define(AppState.selector, AppState);
+        }
+    }
 
     /** Get the current state. */
     public get state(): State {
@@ -33,9 +40,9 @@ export class AppState extends HTMLElement {
     }
 
     /** Publish a custom event to all its listeners. */
-    public fireCustomEvent(event: EventNames, ...args: unknown[]): void {
+    public fireCustomEvent(event: EventNames, opts?: Record<string, unknown>): void {
         if (this._listeners.has(event)) {
-            this._listeners.get(event)?.forEach((listener) => listener(this._state, ...args));
+            this._listeners.get(event)?.forEach((listener) => listener(this._state, opts));
         }
     }
 
@@ -47,8 +54,4 @@ export class AppState extends HTMLElement {
             this._listeners.set(event, [listener]);
         }
     }
-}
-
-if (!customElements.get(AppState.selector)) {
-    customElements.define(AppState.selector, AppState);
 }
