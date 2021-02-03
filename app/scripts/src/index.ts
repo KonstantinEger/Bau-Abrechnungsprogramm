@@ -1,6 +1,6 @@
+import { AppState, NewProjectEvent } from './components/AppState';
 import type { Material, Worker } from './lib/Project';
 import { $ } from './lib/utils';
-import { AppState } from './components/AppState';
 import { Project } from './lib/Project';
 import { ProjectView } from './components/ProjectView';
 import { ipcRenderer as ipc } from 'electron';
@@ -19,7 +19,7 @@ ProjectView.define();
 
 (() => {
     const stateElement = $<AppState>(AppState.selector);
-    stateElement.addCustomEventListener('new-project', () => {
+    stateElement.addEventListener(NewProjectEvent.eventname, () => {
         const appContainer = $<HTMLDivElement>('#app');
         appContainer.innerHTML = '';
         const projectView = document.createElement(ProjectView.selector) as ProjectView;
@@ -40,8 +40,8 @@ ProjectView.define();
                 shouldGenId: false
             });
             project.id = data.project.id;
-            stateElement.state = { fileLocation: data.filePath, project };
-            stateElement.fireCustomEvent('new-project');
+            stateElement.setState({ fileLocation: data.filePath, project });
+            stateElement.dispatchEvent(new NewProjectEvent(project));
         }
     };
 })();
@@ -66,6 +66,6 @@ ipc.on('open:open-project-dialog', () => {
 function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation: string }) {
     if (!projAndLoc) return;
     const stateElement = $<AppState>(AppState.selector);
-    stateElement.state = projAndLoc;
-    stateElement.fireCustomEvent('new-project');
+    stateElement.setState(projAndLoc);
+    stateElement.dispatchEvent(new NewProjectEvent(projAndLoc.project));
 }

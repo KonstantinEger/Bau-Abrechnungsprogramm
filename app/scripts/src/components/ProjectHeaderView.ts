@@ -1,5 +1,5 @@
+import { AppState, ProjectUpdatedEvent } from './AppState';
 import { $ } from '../lib/utils';
-import { AppState } from './AppState';
 import type { Project } from '../lib/Project';
 
 const template = document.createElement('template');
@@ -89,10 +89,9 @@ export class ProjectHeaderView extends HTMLElement {
         const state = stateElement.state;
         if (!state.project) return;
         ProjectHeaderView.render(shadow, state.project);
-        stateElement.addCustomEventListener('project-updated', (newState) => {
-            if (!newState.project) return;
-            ProjectHeaderView.render(shadow, newState.project);
-        });
+        stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            ProjectHeaderView.render(shadow, event.detail);
+        }) as EventListener);
     }
 
 }

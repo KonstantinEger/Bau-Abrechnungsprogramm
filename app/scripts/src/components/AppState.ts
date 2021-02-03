@@ -6,10 +6,6 @@ export type State = {
     fileLocation?: string;
 };
 
-type EventNames = 'new-project' | 'project-updated' | 'statechange';
-
-type CustomEventListener = (state: State, opts?: Record<string, unknown>) => void;
-
 /**
  * WebComponent to contain app state. To `get` the current state,
  * read the `AppState.prototype.state` property. To `set` a new state,
@@ -19,7 +15,6 @@ type CustomEventListener = (state: State, opts?: Record<string, unknown>) => voi
 export class AppState extends HTMLElement {
     public static readonly selector = 'app-state';
     private _state: State = {};
-    private _listeners: Map<EventNames, CustomEventListener[]> = new Map();
 
     /** Defines this WebComponent in the customElement registry. */
     public static define(): void {
@@ -34,24 +29,41 @@ export class AppState extends HTMLElement {
     }
 
     /** Set the current state. */
-    public set state(newState: State) {
+    public setState(newState: State): void {
         this._state = newState;
-        this.fireCustomEvent('statechange');
+        this.dispatchEvent(new StateChangedEvent(newState));
     }
+}
 
-    /** Publish a custom event to all its listeners. */
-    public fireCustomEvent(event: EventNames, opts?: Record<string, unknown>): void {
-        if (this._listeners.has(event)) {
-            this._listeners.get(event)?.forEach((listener) => listener(this._state, opts));
-        }
+/**
+ * Event when a new project is added/loaded. The new project instance
+ * is passed to the event `detail`.
+ */
+export class NewProjectEvent extends CustomEvent<Project> {
+    public static readonly eventname = 'new-project';
+    // eslint-disable-next-line require-jsdoc
+    constructor(project: Project) {
+        super('new-project', { detail: project });
     }
+}
 
-    /** Add an event listener for custom events. */
-    public addCustomEventListener(event: EventNames, listener: CustomEventListener): void {
-        if (this._listeners.has(event)) {
-            this._listeners.get(event)?.push(listener);
-        } else {
-            this._listeners.set(event, [listener]);
-        }
+/**
+ * Event to fire when a project is updated. The new project instance
+ * is passed to the event `detail`.
+ */
+export class ProjectUpdatedEvent extends CustomEvent<Project> {
+    public static readonly eventname = 'project-updated';
+    // eslint-disable-next-line require-jsdoc
+    constructor(project: Project) {
+        super(ProjectUpdatedEvent.eventname, { detail: project });
+    }
+}
+
+/** Event for AppState changes. */
+export class StateChangedEvent extends CustomEvent<State> {
+    public static readonly eventname = 'statechanged';
+    // eslint-disable-next-line require-jsdoc
+    constructor(newState: State) {
+        super(StateChangedEvent.eventname, { detail: newState });
     }
 }
