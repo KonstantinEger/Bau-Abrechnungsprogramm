@@ -1,5 +1,6 @@
 import { MaterialsView } from './MaterialsView';
 import { ProjectHeaderView } from './ProjectHeaderView';
+import { WorkersView } from './WorkersView';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -34,6 +35,7 @@ export class ProjectView extends HTMLElement {
     public connectedCallback(): void {
         MaterialsView.define();
         ProjectHeaderView.define();
+        WorkersView.define();
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));
     }
