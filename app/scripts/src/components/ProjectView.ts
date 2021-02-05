@@ -1,5 +1,6 @@
+import { BillView } from './BillView';
+import { HeaderView } from './HeaderView';
 import { MaterialsView } from './MaterialsView';
-import { ProjectHeaderView } from './ProjectHeaderView';
 import { WorkersView } from './WorkersView';
 
 const template = document.createElement('template');
@@ -7,12 +8,12 @@ template.innerHTML = `
 <style>
     .body-grid-3 {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 400px;
         height: calc(100vh - 103px);
         border-top: 3px solid var(--primary-color);
     }
 </style>
-<project-header-view></project-header-view>
+<header-view></header-view>
 <div class="body-grid-3">
     <materials-view></materials-view>
     <workers-view></workers-view>
@@ -33,8 +34,9 @@ export class ProjectView extends HTMLElement {
 
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
+        BillView.define();
+        HeaderView.define();
         MaterialsView.define();
-        ProjectHeaderView.define();
         WorkersView.define();
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));

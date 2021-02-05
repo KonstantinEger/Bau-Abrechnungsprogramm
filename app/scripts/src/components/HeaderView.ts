@@ -56,13 +56,13 @@ template.innerHTML = `
 `;
 
 /** WebComponent to render the Header in the ProjectView. */
-export class ProjectHeaderView extends HTMLElement {
-    public static readonly selector = 'project-header-view';
+export class HeaderView extends HTMLElement {
+    public static readonly selector = 'header-view';
 
     /** Define this WebComponent in the customElements registry. */
     public static define(): void {
-        if (!customElements.get(ProjectHeaderView.selector)) {
-            customElements.define(ProjectHeaderView.selector, ProjectHeaderView);
+        if (!customElements.get(HeaderView.selector)) {
+            customElements.define(HeaderView.selector, HeaderView);
         }
     }
 
@@ -76,7 +76,7 @@ export class ProjectHeaderView extends HTMLElement {
     private static render(shadow: ShadowRoot, project: Project): void {
         $('#project-name-display', shadow).textContent = project.name;
         $('#project-place-display', shadow).textContent = project.place;
-        $('#project-date-display', shadow).textContent = ProjectHeaderView.formatDateString(project.date);
+        $('#project-date-display', shadow).textContent = HeaderView.formatDateString(project.date);
         $<HTMLTextAreaElement>('#notes-input', shadow).value = project.descr;
     }
 
@@ -88,10 +88,9 @@ export class ProjectHeaderView extends HTMLElement {
         const stateElement = $<AppState>(AppState.selector);
         const state = stateElement.state;
         if (!state.project) return;
-        ProjectHeaderView.render(shadow, state.project);
+        HeaderView.render(shadow, state.project);
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
-            ProjectHeaderView.render(shadow, event.detail);
+            HeaderView.render(shadow, event.detail);
         }) as EventListener);
     }
-
 }
