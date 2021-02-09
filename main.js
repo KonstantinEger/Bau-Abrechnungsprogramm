@@ -96,6 +96,14 @@ app.on('ready', () => {
                     },
                     accelerator: devMode ? 'CmdOrCtrl+Shift+I' : undefined,
                     visible: devMode
+                },
+                {
+                    label: 'Test-Projekt laden',
+                    click() {
+                        mainWindow.webContents.send('dev:load-test-project');
+                    },
+                    accelerator: devMode ? 'CmdOrCtrl+Shift+T' : undefined,
+                    visible: devMode
                 }
             ]
         }

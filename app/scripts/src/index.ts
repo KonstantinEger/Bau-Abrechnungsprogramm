@@ -61,6 +61,26 @@ ipc.on('open:open-project-dialog', () => {
     openProjectDialog().then(handleOpenDialogResponse);
 });
 
+ipc.on('dev:load-test-project', () => {
+    const stateElement = $<AppState>(AppState.selector);
+    stateElement.newProject({
+        filepath: 'test-file-path',
+        project: new Project({
+            brutto: 1234,
+            date: '2020-02-03',
+            description: 'test-project-descr',
+            name: 'project_name',
+            place: 'project_place',
+            shouldGenId: true,
+            materials: [
+                { name: 'Sand', price: '30.91', receiptId: 'r001' },
+                { name: 'Beton', price: '31.23', receiptId: 'r002' }
+            ],
+            workers: [{ numHours: 10, type: 'Bauleiter', wage: 10.50 }]
+        })
+    });
+});
+
 /** Handle responses from the open-project-dialog */
 function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation: string }) {
     if (!projAndLoc) return;
