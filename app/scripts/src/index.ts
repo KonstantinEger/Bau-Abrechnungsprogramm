@@ -40,8 +40,7 @@ ProjectView.define();
                 shouldGenId: false
             });
             project.id = data.project.id;
-            stateElement.setState({ fileLocation: data.filePath, project });
-            stateElement.dispatchEvent(new NewProjectEvent(project));
+            stateElement.newProject({ project, filepath: data.filePath });
         }
     };
 })();
@@ -65,7 +64,7 @@ ipc.on('open:open-project-dialog', () => {
 /** Handle responses from the open-project-dialog */
 function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation: string }) {
     if (!projAndLoc) return;
+    const { project, fileLocation } = projAndLoc;
     const stateElement = $<AppState>(AppState.selector);
-    stateElement.setState(projAndLoc);
-    stateElement.dispatchEvent(new NewProjectEvent(projAndLoc.project));
+    stateElement.newProject({ project, filepath: fileLocation });
 }

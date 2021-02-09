@@ -2,19 +2,20 @@ import type { Project } from '../lib/Project';
 
 /** AppState state */
 export type State = {
-    project?: Project;
-    fileLocation?: string;
+    project: Project;
+    fileLocation: string;
 };
 
 /**
  * WebComponent to contain app state. To `get` the current state,
- * read the `AppState.prototype.state` property. To `set` a new state,
- * reassign the `AppState.prototype.state` property. To listen for state
- * changes, set the `AppState.prototype.onstatechange` method to a callback.
+ * read the `AppState.prototype.state` property. There are multiple ways
+ * of mutating the current state: `AppState.prototype.newProject` &
+ * `AppState.prototype.updateProject`. The following custom events
+ * are present: `NewProject-`, `ProjectUpdated-` and `StateChangedEvent`.
  */
 export class AppState extends HTMLElement {
     public static readonly selector = 'app-state';
-    private _state: State = {};
+    private _state: State | undefined;
 
     /** Defines this WebComponent in the customElement registry. */
     public static define(): void {
@@ -25,13 +26,37 @@ export class AppState extends HTMLElement {
 
     /** Get the current state. */
     public get state(): State {
+        if (!this._state) throw new Error('State is still undefined');
         return this._state;
     }
 
-    /** Set the current state. */
-    public setState(newState: State): void {
-        this._state = newState;
-        this.dispatchEvent(new StateChangedEvent(newState));
+    /**
+     * Method to call when a _completely new_ project is added to the app.
+     * Triggers: `StateChangedEvent`, `NewProjectEvent`.
+     */
+    public newProject({ project, filepath }: { project: Project; filepath: string }): void {
+        this._state = {
+            project,
+            fileLocation: filepath
+        };
+        this.dispatchEvent(new StateChangedEvent(this._state));
+        this.dispatchEvent(new NewProjectEvent(project));
+    }
+
+    /**
+     * Method to call when the _current, active_ project should get updated.
+     * The old project instance will get passed to the callback. Triggers:
+     * `StateChangedEvent`, `ProjectUpdatedEvent`.
+     */
+    public updateProject(cb: (old: Project) => Project): void {
+        const oldState = this.state;
+        const newProject = cb(oldState.project);
+        this._state = {
+            project: newProject,
+            fileLocation: oldState.fileLocation
+        };
+        this.dispatchEvent(new StateChangedEvent(this._state));
+        this.dispatchEvent(new ProjectUpdatedEvent(newProject));
     }
 }
 

@@ -87,7 +87,6 @@ export class HeaderView extends HTMLElement {
 
         const stateElement = $<AppState>(AppState.selector);
         const state = stateElement.state;
-        if (!state.project) return;
         HeaderView.render(shadow, state.project);
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
             HeaderView.render(shadow, event.detail);
