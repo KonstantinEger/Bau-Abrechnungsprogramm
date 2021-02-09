@@ -31,6 +31,11 @@ export function $<E = HTMLElement>(selector: string, doc?: Document | ShadowRoot
     return el;
 }
 
+/** Rounds a number to a specific amount of decimal places. Default is `2`. */
+export function roundNum(num: number, decimals = 2): number {
+    return Math.round(num * (10 ** decimals)) / (10 ** decimals);
+}
+
 /** Namespace for utility methods regarding Events */
 export abstract class Events {
     /**

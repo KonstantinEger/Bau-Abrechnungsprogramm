@@ -1,4 +1,7 @@
 import * as styles from './common_styles';
+import { $, roundNum } from '../lib/utils';
+import type { AppState } from './AppState';
+import type { Material } from '../lib/Project';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -42,5 +45,15 @@ export class MaterialsView extends HTMLElement {
     public connectedCallback(): void {
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.appendChild(template.content.cloneNode(true));
+
+        const { project } = $<AppState>('app-state').state;
+        $('.costs-display', shadow).textContent = this.updateCosts(project.materials).toString();
+    }
+
+    /** Calculate the costs for materials and set the `costs` attribute. */
+    private updateCosts(materials: Material[]): number {
+        const costs = roundNum(materials.reduce((sum, val) => sum + parseFloat(val.price), 0));
+        this.setAttribute('costs', costs.toString());
+        return costs;
     }
 }
