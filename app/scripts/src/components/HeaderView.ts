@@ -73,23 +73,22 @@ export class HeaderView extends HTMLElement {
     }
 
     /** Render the project properties. */
-    private static render(shadow: ShadowRoot, project: Project): void {
-        $('#project-name-display', shadow).textContent = project.name;
-        $('#project-place-display', shadow).textContent = project.place;
-        $('#project-date-display', shadow).textContent = HeaderView.formatDateString(project.date);
-        $<HTMLTextAreaElement>('#notes-input', shadow).value = project.descr;
+    private static render(project: Project): void {
+        $('#project-name-display').textContent = project.name;
+        $('#project-place-display').textContent = project.place;
+        $('#project-date-display').textContent = HeaderView.formatDateString(project.date);
+        $<HTMLTextAreaElement>('#notes-input').value = project.descr;
     }
 
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
-        const shadow = this.attachShadow({ mode: 'open' });
-        shadow.appendChild(template.content.cloneNode(true));
+        this.appendChild(template.content.cloneNode(true));
 
         const stateElement = $<AppState>(AppState.selector);
         const state = stateElement.state;
-        HeaderView.render(shadow, state.project);
+        HeaderView.render(state.project);
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
-            HeaderView.render(shadow, event.detail);
+            HeaderView.render(event.detail);
         }) as EventListener);
     }
 }

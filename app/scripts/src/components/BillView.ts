@@ -82,7 +82,6 @@ export class BillView extends HTMLElement {
 
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
-        const shadow = this.attachShadow({ mode: 'open' });
-        shadow.appendChild(template.content.cloneNode(true));
+        this.appendChild(template.content.cloneNode(true));
     }
 }

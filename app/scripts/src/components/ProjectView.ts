@@ -38,7 +38,6 @@ export class ProjectView extends HTMLElement {
         HeaderView.define();
         MaterialsView.define();
         WorkersView.define();
-        const shadow = this.attachShadow({ mode: 'open' });
-        shadow.appendChild(template.content.cloneNode(true));
+        this.appendChild(template.content.cloneNode(true));
     }
 }

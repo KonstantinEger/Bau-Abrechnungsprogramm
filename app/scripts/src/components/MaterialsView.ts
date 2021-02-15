@@ -43,11 +43,10 @@ export class MaterialsView extends HTMLElement {
 
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
-        const shadow = this.attachShadow({ mode: 'open' });
-        shadow.appendChild(template.content.cloneNode(true));
+        this.appendChild(template.content.cloneNode(true));
 
         const { project } = $<AppState>('app-state').state;
-        $('.costs-display', shadow).textContent = this.updateCosts(project.materials).toString();
+        $('.costs-display').textContent = this.updateCosts(project.materials).toString();
     }
 
     /** Calculate the costs for materials and set the `costs` attribute. */
