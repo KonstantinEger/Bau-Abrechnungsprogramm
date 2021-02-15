@@ -25,7 +25,7 @@ export abstract class Validation {
 }
 
 /** Shortcut for `document.querySelector(...)`. Throws a fatal error if not found. */
-export function $<E = HTMLElement>(selector: string, doc?: Document | ShadowRoot): E {
+export function $<E = HTMLElement>(selector: string, doc?: Document | ShadowRoot | Element): E {
     const el = (doc ?? document).querySelector(selector) as E | null;
     if (!el) throwFatalErr('Interner Fehler', `Kann Element ${selector} nicht finden.`);
     return el;
