@@ -12,7 +12,7 @@ template.innerHTML = `
         ${styles.tableHeading()}
         ${styles.tableData()}
         ${styles.columnFooter('.col-footer')}
-        ${styles.columnFooterCost('.costs-display')}
+        ${styles.columnFooterCost('#mat-costs-display')}
     </style>
     <div class="col-body">
         <span class="heading">Materialkosten</span>
@@ -26,7 +26,7 @@ template.innerHTML = `
     </div>
     <div class="col-footer">
         <button>Hinzufügen</button>
-        <span class="costs-display">123</span>
+        <span id="mat-costs-display"></span>
     </div>
 `;
 
@@ -44,9 +44,8 @@ export class MaterialsView extends HTMLElement {
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-
         const { project } = $<AppState>('app-state').state;
-        $('.costs-display').textContent = this.updateCosts(project.materials).toString();
+        $('#mat-costs-display', this).textContent = this.updateCosts(project.materials).toString();
     }
 
     /** Calculate the costs for materials and set the `costs` attribute. */

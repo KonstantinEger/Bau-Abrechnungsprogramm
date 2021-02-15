@@ -1,11 +1,14 @@
 import * as styles from './common_styles';
+import { $, roundNum } from '../lib/utils';
+import type { AppState } from './AppState';
+import type { Worker } from '../lib/Project';
 
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
     ${styles.columnBody('.col-body')}
     ${styles.columnFooter('.col-footer')}
-    ${styles.columnFooterCost('.costs-display')}
+    ${styles.columnFooterCost('#worker-costs-display')}
     ${styles.columnHeading('.heading')}
     ${styles.columnTable('table')}
     ${styles.tableData('td')}
@@ -23,7 +26,7 @@ template.innerHTML = `
 </div>
 <div class="col-footer">
     <button>Typ hinzufügen</button>
-    <span class="costs-display">123</span>
+    <span id="worker-costs-display"></span>
 </div>
 `;
 
@@ -41,5 +44,16 @@ export class WorkersView extends HTMLElement {
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
+        const { project } = $<AppState>('app-state').state;
+        $('#worker-costs-display', this).textContent = this.updateCosts(project.workers).toString();
+    }
+
+    /** Calculate the costs for workers and set the `costs` attribute. */
+    private updateCosts(workers: Worker[]): number {
+        const costs = roundNum(workers.reduce((sum, worker) => {
+            return sum + (worker.wage * worker.numHours);
+        }, 0));
+        this.setAttribute('costs', costs.toString());
+        return costs;
     }
 }
