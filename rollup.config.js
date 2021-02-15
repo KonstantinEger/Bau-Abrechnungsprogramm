@@ -23,7 +23,7 @@ export default {
         dir: distDir,
         entryFileNames: '[name]-entry.js',
         chunkFileNames: '[name]-chunk-[hash].js',
-        sourcemap: true
+        sourcemap: production ? false : 'inline'
     },
     plugins: [
         production ? del({
@@ -31,7 +31,8 @@ export default {
             verbose: true
         }) : undefined,
         typescript({
-            tsconfig: './tsconfig.json'
+            tsconfig: './tsconfig.json',
+            sourceMap: !production
         }),
         html({
             include: '**/*.html',
