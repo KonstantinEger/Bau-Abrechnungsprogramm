@@ -99,7 +99,6 @@ export class BillView extends HTMLElement {
             if (!newVal) return;
             stateElement.updateProject((project) => {
                 project.brutto = parseFloat(newVal);
-                this.render(project);
                 return project;
             });
         });
@@ -110,14 +109,20 @@ export class BillView extends HTMLElement {
         const bruttoInput = $<HTMLInputElement>('#brutto-input', this);
         if (bruttoInput.value !== brutto.toString()) bruttoInput.value = brutto.toString();
         const netto = brutto - (brutto * 0.19);
-        $('#netto-display', this).textContent = roundNum(netto).toString();
+        $('#netto-display', this).textContent = `${roundNum(netto)}€`;
         const matCosts = MaterialsView.calcCosts(materials);
         const workersCosts = WorkersView.calcCosts(workers);
         const totalCosts = matCosts + workersCosts;
-        $('#costs-display', this).textContent = roundNum(-totalCosts).toString();
+        $('#costs-display', this).textContent = `${roundNum(-totalCosts)}€`;
         const bilanzEuros = netto - totalCosts;
         const bilanzPc = (bilanzEuros / netto) * 100;
-        $('#bilanz-in-euros', this).textContent = roundNum(bilanzEuros).toString();
-        $('#bilanz-in-pc', this).textContent = roundNum(bilanzPc).toString();
+        $('#bilanz-in-euros', this).textContent = `${roundNum(bilanzEuros)}€`;
+        if (bilanzEuros < 0) {
+            $('#bilanz-in-pc', this).textContent = '0%';
+            $('#bilanz-section div', this).classList.add('negative');
+        } else {
+            $('#bilanz-in-pc', this).textContent = `${roundNum(bilanzPc)}%`;
+            $('#bilanz-section div', this).classList.remove('negative');
+        }
     }
 }

@@ -45,12 +45,14 @@ export class AppState extends HTMLElement {
 
     /**
      * Method to call when the _current, active_ project should get updated.
-     * The old project instance will get passed to the callback. Triggers:
+     * The old project instance will get passed to the callback, the updated
+     * project may be returned. To abort the update, return `null`. Triggers:
      * `StateChangedEvent`, `ProjectUpdatedEvent`.
      */
-    public updateProject(cb: (old: Project) => Project): void {
+    public updateProject(cb: (old: Project) => Project | null): void {
         const oldState = this.state;
         const newProject = cb(oldState.project);
+        if (newProject === null) return;
         this._state = {
             project: newProject,
             fileLocation: oldState.fileLocation

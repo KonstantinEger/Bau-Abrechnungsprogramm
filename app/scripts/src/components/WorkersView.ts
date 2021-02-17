@@ -1,6 +1,7 @@
 import * as styles from './common_styles';
-import { $, roundNum } from '../lib/utils';
+import { $, Validation, roundNum } from '../lib/utils';
 import type { AppState } from './AppState';
+import { ProjectUpdatedEvent } from './AppState';
 import type { Worker } from '../lib/Project';
 
 const template = document.createElement('template');
@@ -13,16 +14,13 @@ template.innerHTML = `
     ${styles.columnTable('table')}
     ${styles.tableData('td')}
     ${styles.tableHeading('th')}
+    #workers-table input {
+        width: 30px;
+    }
 </style>
 <div class="col-body">
     <span class="heading">Lohnkosten</span>
-    <table>
-        <tr>
-            <th>Typ:</th>
-            <th>Stunden:</th>
-            <th></th>
-        </tr>
-    </table>
+    <table id="workers-table"></table>
 </div>
 <div class="col-footer">
     <button>Typ hinzufügen</button>
@@ -51,10 +49,52 @@ export class WorkersView extends HTMLElement {
         return list.reduce((sum, { numHours, wage }) => sum + (numHours * wage), 0);
     }
 
+    /** Eventlistener for the "change-hours" InputElement. */
+    private static changeHoursListener(rowIdx: number) {
+        return (event: KeyboardEvent): void => {
+            if (event.code !== 'Enter') return;
+            const newVal = (event.target as HTMLInputElement).value;
+            if (!newVal || Validation.isInvalid(newVal)) return;
+            $<AppState>('app-state').updateProject((project) => {
+                const newHours = parseInt(newVal);
+                if (project.workers[rowIdx].numHours + newHours < 0) return null;
+                project.workers[rowIdx].numHours += newHours;
+                return project;
+            });
+        };
+    }
+
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const workers = $<AppState>('app-state').state.project.workers;
+        const stateElement = $<AppState>('app-state');
+        const workers = stateElement.state.project.workers;
+        this.renderWorkersList(workers);
         $('#worker-costs-display', this).textContent = roundNum(WorkersView.calcCosts(workers)).toString();
+        stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            this.renderWorkersList(event.detail.workers);
+            $('#worker-costs-display', this).textContent = roundNum(WorkersView.calcCosts(event.detail.workers)).toString();
+        }) as EventListener);
+    }
+
+    /** Render the workers list and attach event listeners */
+    private renderWorkersList(workers: Worker[]): void {
+        const wTable = $<HTMLTableElement>('#workers-table', this);
+        wTable.innerHTML = '<tr><th>Typ:</th><th>Stunden:</th><th>+/-</th></tr>';
+        workers.forEach((wkr, rowIdx) => {
+            const row = document.createElement('tr');
+            const tdType = document.createElement('td');
+            const tdHours = document.createElement('td');
+            const tdInput = document.createElement('td');
+            tdType.textContent = `${wkr.type} - ${wkr.wage} €/h`;
+            tdHours.textContent = wkr.numHours.toString();
+            const changeHoursInput = document.createElement('input');
+            changeHoursInput.type = 'number';
+            changeHoursInput.value = '0';
+            changeHoursInput.onkeyup = WorkersView.changeHoursListener(rowIdx);
+            tdInput.appendChild(changeHoursInput);
+            row.append(tdType, tdHours, tdInput);
+            wTable.appendChild(row);
+        });
     }
 }
