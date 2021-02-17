@@ -1,7 +1,8 @@
 import * as styles from './common_styles';
-import { $, roundNum } from '../lib/utils';
+import { $, Validation, roundNum } from '../lib/utils';
 import type { AppState } from './AppState';
 import type { Material } from '../lib/Project';
+import { ProjectUpdatedEvent } from './AppState';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -16,19 +17,19 @@ template.innerHTML = `
     </style>
     <div class="col-body">
         <span class="heading">Materialkosten</span>
-        <table>
-            <tr>
-                <th>Name:</th>
-                <th>Rechnungsnummer:</th>
-                <th>Betrag in €:</th>
-            </tr>
-        </table>
+        <table id="mat-table"></table>
     </div>
     <div class="col-footer">
         <button>Hinzufügen</button>
         <span id="mat-costs-display"></span>
     </div>
 `;
+
+enum TableColumn {
+    NAME,
+    RECEIPT,
+    PRICE
+}
 
 /** WebComponent to render the materials list and its footer. */
 export class MaterialsView extends HTMLElement {
@@ -41,17 +42,90 @@ export class MaterialsView extends HTMLElement {
         }
     }
 
+    /**
+     * Sum up the costs for materials. If no array with materials is provided,
+     * the current project from `AppState` is used. **The result is not rounded.**
+     */
+    public static calcCosts(materials?: Material[]): number {
+        const list = materials ?? $<AppState>('app-state').state.project.materials;
+        return list.reduce((sum, { price }) => sum + parseFloat(price), 0);
+    }
+
+    /**
+     * Sets up edit inputs for editing the material property and
+     * handles inputs on them. Automatically triggers the `ProjectUpdatedEvent`
+     * on the AppState on completion.
+     */
+    private static editPropListeners(column: TableColumn, rowIdx: number) {
+        return (mEvent: MouseEvent) => {
+            const target = mEvent.target as HTMLTableDataCellElement;
+            target.ondblclick = null;
+            const oldVal = target.textContent ?? '';
+            const input = document.createElement('input');
+            input.value = oldVal;
+            if (column === TableColumn.PRICE) input.type = 'number';
+            target.innerHTML = '';
+            target.appendChild(input);
+            input.focus();
+            input.onkeyup = (kEvent) => {
+                if (kEvent.code !== 'Enter') return;
+                const newVal = input.value;
+                if (!newVal || Validation.isInvalid(newVal)) return;
+                const stateElement = $<AppState>('app-state');
+                stateElement.updateProject((oldProj) => {
+                    switch (column) {
+                        case TableColumn.NAME: {
+                            oldProj.materials[rowIdx].name = newVal;
+                            break;
+                        }
+                        case TableColumn.RECEIPT: {
+                            oldProj.materials[rowIdx].receiptId = newVal;
+                            break;
+                        }
+                        case TableColumn.PRICE: {
+                            oldProj.materials[rowIdx].price = newVal;
+                            break;
+                        }
+                    }
+                    return oldProj;
+                });
+            };
+            // TODO: input.onblur
+        };
+    }
+
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const { project } = $<AppState>('app-state').state;
-        $('#mat-costs-display', this).textContent = this.updateCosts(project.materials).toString();
+        const stateElement = $<AppState>('app-state');
+        const materials = stateElement.state.project.materials;
+        this.renderMatList(materials);
+        $('#mat-costs-display', this).textContent = roundNum(MaterialsView.calcCosts(materials)).toString();
+        stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            //! Doesn't need a full re-render if nothing about materials changes.
+            //TODO: `MaterialsChangedEvent`
+            this.renderMatList(event.detail.materials);
+            $('#mat-costs-display', this).textContent = roundNum(MaterialsView.calcCosts(event.detail.materials)).toString();
+        }) as EventListener);
     }
 
-    /** Calculate the costs for materials and set the `costs` attribute. */
-    private updateCosts(materials: Material[]): number {
-        const costs = roundNum(materials.reduce((sum, val) => sum + parseFloat(val.price), 0));
-        this.setAttribute('costs', costs.toString());
-        return costs;
+    /** Render the material list */
+    private renderMatList(materials: Material[]): void {
+        const matTable = $<HTMLTableElement>('#mat-table', this);
+        matTable.innerHTML = '<tr><th>Name:</th><th>Rechnungsnummer:</th><th>Betrag in €:</th></tr>';
+        materials.forEach((mat, rowIdx) => {
+            const row = document.createElement('tr');
+            const tdName = document.createElement('td');
+            const tdReceipt = document.createElement('td');
+            const tdPrice = document.createElement('td');
+            tdName.textContent = mat.name;
+            tdReceipt.textContent = mat.receiptId;
+            tdPrice.textContent = mat.price;
+            tdName.ondblclick = MaterialsView.editPropListeners(TableColumn.NAME, rowIdx).bind(this);
+            tdReceipt.ondblclick = MaterialsView.editPropListeners(TableColumn.RECEIPT, rowIdx).bind(this);
+            tdPrice.ondblclick = MaterialsView.editPropListeners(TableColumn.PRICE, rowIdx).bind(this);
+            row.append(tdName, tdReceipt, tdPrice);
+            matTable.appendChild(row);
+        });
     }
 }

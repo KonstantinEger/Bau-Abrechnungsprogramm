@@ -1,7 +1,9 @@
 import { $, Events, roundNum } from '../lib/utils';
-import type { AppState } from './AppState';
-import type { MaterialsView } from './MaterialsView';
-import type { WorkersView } from './WorkersView';
+import type { AppState} from './AppState';
+import { MaterialsView } from './MaterialsView';
+import type { Project } from '../lib/Project';
+import { ProjectUpdatedEvent } from './AppState';
+import { WorkersView } from './WorkersView';
 import { columnHeading } from './common_styles';
 
 const template = document.createElement('template');
@@ -88,29 +90,32 @@ export class BillView extends HTMLElement {
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
         const stateElement = $<AppState>('app-state');
-        this.render(stateElement.state.project.brutto);
+        this.render(stateElement.state.project);
+        stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            this.render(event.detail);
+        }) as EventListener);
         $<HTMLInputElement>('#brutto-input', this).oninput = Events.debounce(750, (event) => {
             const newVal = (event.target as HTMLInputElement).value;
             if (!newVal) return;
             stateElement.updateProject((project) => {
                 project.brutto = parseFloat(newVal);
-                this.render(project.brutto);
+                this.render(project);
                 return project;
             });
         });
     }
 
     /** Fill in the placeholders of the view. */
-    private render(brutto: number): void {
+    private render({ brutto, materials, workers }: Project): void {
         const bruttoInput = $<HTMLInputElement>('#brutto-input', this);
         if (bruttoInput.value !== brutto.toString()) bruttoInput.value = brutto.toString();
         const netto = brutto - (brutto * 0.19);
         $('#netto-display', this).textContent = roundNum(netto).toString();
-        const matCosts = parseFloat($<MaterialsView>('materials-view').getAttribute('costs') ?? '0');
-        const workersCosts = parseFloat($<WorkersView>('workers-view').getAttribute('costs') ?? '0');
-        const costs = matCosts + workersCosts;
-        $('#costs-display', this).textContent = roundNum(-costs).toString();
-        const bilanzEuros = netto - costs;
+        const matCosts = MaterialsView.calcCosts(materials);
+        const workersCosts = WorkersView.calcCosts(workers);
+        const totalCosts = matCosts + workersCosts;
+        $('#costs-display', this).textContent = roundNum(-totalCosts).toString();
+        const bilanzEuros = netto - totalCosts;
         const bilanzPc = (bilanzEuros / netto) * 100;
         $('#bilanz-in-euros', this).textContent = roundNum(bilanzEuros).toString();
         $('#bilanz-in-pc', this).textContent = roundNum(bilanzPc).toString();

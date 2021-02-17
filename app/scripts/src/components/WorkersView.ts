@@ -41,19 +41,20 @@ export class WorkersView extends HTMLElement {
         }
     }
 
+    /**
+     * Sum up the costs for workers. If no array of workers is provided,
+     * the current project from `AppState` is used. **The result is not
+     * rounded.**
+     */
+    public static calcCosts(workers?: Worker[]): number {
+        const list = workers ?? $<AppState>('app-state').state.project.workers;
+        return list.reduce((sum, { numHours, wage }) => sum + (numHours * wage), 0);
+    }
+
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const { project } = $<AppState>('app-state').state;
-        $('#worker-costs-display', this).textContent = this.updateCosts(project.workers).toString();
-    }
-
-    /** Calculate the costs for workers and set the `costs` attribute. */
-    private updateCosts(workers: Worker[]): number {
-        const costs = roundNum(workers.reduce((sum, worker) => {
-            return sum + (worker.wage * worker.numHours);
-        }, 0));
-        this.setAttribute('costs', costs.toString());
-        return costs;
+        const workers = $<AppState>('app-state').state.project.workers;
+        $('#worker-costs-display', this).textContent = roundNum(WorkersView.calcCosts(workers)).toString();
     }
 }

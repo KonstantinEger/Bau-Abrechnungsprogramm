@@ -88,6 +88,8 @@ export class HeaderView extends HTMLElement {
         const state = stateElement.state;
         HeaderView.render(state.project);
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            //! Doesn't need a re-render if nothing about the header data changes.
+            //TODO: Maybe a `HeaderDataChangedEvent` would be better.
             HeaderView.render(event.detail);
         }) as EventListener);
     }
