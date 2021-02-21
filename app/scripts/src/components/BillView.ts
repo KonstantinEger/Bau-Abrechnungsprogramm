@@ -121,7 +121,7 @@ export class BillView extends HTMLElement {
             $('#bilanz-in-pc', this).textContent = '0%';
             $('#bilanz-section div', this).classList.add('negative');
         } else {
-            $('#bilanz-in-pc', this).textContent = `${roundNum(bilanzPc)}%`;
+            $('#bilanz-in-pc', this).textContent = `${roundNum(bilanzPc) || 0}%`;
             $('#bilanz-section div', this).classList.remove('negative');
         }
     }

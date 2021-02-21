@@ -27,20 +27,39 @@ ProjectView.define();
     });
 
     window.onmessage = ({ data }: { data: MessageData }) => {
-        if (data.name === 'NEW_PROJECT') {
-            if (!data.project || !data.filePath) return;
-            const project = new Project({
-                name: data.project.name,
-                date: data.project.date,
-                place: data.project.place,
-                description: data.project.descr,
-                brutto: data.project.brutto,
-                materials: data.project.materials,
-                workers: data.project.workers,
-                shouldGenId: false
-            });
-            project.id = data.project.id;
-            stateElement.newProject({ project, filepath: data.filePath });
+        switch (data.name) {
+            case 'NEW_PROJECT': {
+                if (!data.project || !data.filePath) return;
+                const project = new Project({
+                    name: data.project.name,
+                    date: data.project.date,
+                    place: data.project.place,
+                    description: data.project.descr,
+                    brutto: data.project.brutto,
+                    materials: data.project.materials,
+                    workers: data.project.workers,
+                    shouldGenId: false
+                });
+                project.id = data.project.id;
+                stateElement.newProject({ project, filepath: data.filePath });
+                break;
+            }
+            case 'NEW_MATERIAL': {
+                stateElement.updateProject((oldProj) => {
+                    if (!data.material) return null;
+                    oldProj.materials.push(data.material);
+                    return oldProj;
+                });
+                break;
+            }
+            case 'NEW_WORKER_TYPE': {
+                stateElement.updateProject((oldProj) => {
+                    if (!data.worker) return null;
+                    oldProj.workers.push(data.worker);
+                    return oldProj;
+                });
+                break;
+            }
         }
     };
 })();

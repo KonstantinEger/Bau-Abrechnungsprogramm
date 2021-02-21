@@ -20,7 +20,7 @@ template.innerHTML = `
         <table id="mat-table"></table>
     </div>
     <div class="col-footer">
-        <button>Hinzufügen</button>
+        <button class="btn btn-primary" id="add-mat-btn">Hinzufügen</button>
         <span id="mat-costs-display"></span>
     </div>
 `;
@@ -100,13 +100,18 @@ export class MaterialsView extends HTMLElement {
         const stateElement = $<AppState>('app-state');
         const materials = stateElement.state.project.materials;
         this.renderMatList(materials);
-        $('#mat-costs-display', this).textContent = roundNum(MaterialsView.calcCosts(materials)).toString();
+        $('#mat-costs-display', this).textContent = `${roundNum(MaterialsView.calcCosts(materials)).toString()}€`;
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+            const mat = event.detail.materials;
             //! Doesn't need a full re-render if nothing about materials changes.
             //TODO: `MaterialsChangedEvent`
-            this.renderMatList(event.detail.materials);
-            $('#mat-costs-display', this).textContent = roundNum(MaterialsView.calcCosts(event.detail.materials)).toString();
+            this.renderMatList(mat);
+            $('#mat-costs-display', this).textContent = `${roundNum(MaterialsView.calcCosts(mat)).toString()}€`;
         }) as EventListener);
+
+        $<HTMLButtonElement>('#add-mat-btn', this).onclick = () => {
+            window.open('./new_material.html', '_blank', 'width=480,height=420');
+        };
     }
 
     /** Render the material list */

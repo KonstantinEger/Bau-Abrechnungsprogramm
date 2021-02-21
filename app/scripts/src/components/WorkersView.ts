@@ -23,7 +23,7 @@ template.innerHTML = `
     <table id="workers-table"></table>
 </div>
 <div class="col-footer">
-    <button>Typ hinzufügen</button>
+    <button class="btn btn-primary" id="add-worker-btn">Typ hinzufügen</button>
     <span id="worker-costs-display"></span>
 </div>
 `;
@@ -70,11 +70,15 @@ export class WorkersView extends HTMLElement {
         const stateElement = $<AppState>('app-state');
         const workers = stateElement.state.project.workers;
         this.renderWorkersList(workers);
-        $('#worker-costs-display', this).textContent = roundNum(WorkersView.calcCosts(workers)).toString();
+        $('#worker-costs-display', this).textContent = `${roundNum(WorkersView.calcCosts(workers)).toString()}€`;
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
             this.renderWorkersList(event.detail.workers);
-            $('#worker-costs-display', this).textContent = roundNum(WorkersView.calcCosts(event.detail.workers)).toString();
+            $('#worker-costs-display', this).textContent = `${roundNum(WorkersView.calcCosts(event.detail.workers)).toString()}€`;
         }) as EventListener);
+
+        $<HTMLButtonElement>('#add-worker-btn', this).onclick = () => {
+            window.open('./new_worker_type.html', '_blank', 'width=480,height=420');
+        };
     }
 
     /** Render the workers list and attach event listeners */
