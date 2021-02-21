@@ -40,6 +40,7 @@ declare module '@electron/remote' {
     }
 
     export const dialog: Dialog;
+    export const process: NodeJS.Process;
 
     export function getCurrentWindow(): BrowserWindow;
 }

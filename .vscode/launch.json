@@ -18,7 +18,8 @@
                 "--remote-debugging-port=9222"
             ],
             "webRoot": "${workspaceRoot}",
-            "preLaunchTask": "npm: build-rollup"
+            "preLaunchTask": "npm: build-rollup",
+            "outFiles": ["${workspaceRoot}/app/scripts/dist/*.js"]
         }
     ]
 }

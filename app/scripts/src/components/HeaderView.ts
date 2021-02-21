@@ -1,5 +1,5 @@
+import { $, Events, Validation } from '../lib/utils';
 import { AppState, ProjectUpdatedEvent } from './AppState';
-import { $ } from '../lib/utils';
 import type { Project } from '../lib/Project';
 
 const template = document.createElement('template');
@@ -77,7 +77,16 @@ export class HeaderView extends HTMLElement {
         $('#project-name-display').textContent = project.name;
         $('#project-place-display').textContent = project.place;
         $('#project-date-display').textContent = HeaderView.formatDateString(project.date);
-        $<HTMLTextAreaElement>('#notes-input').value = project.descr;
+        const notesInputEl = $<HTMLTextAreaElement>('#notes-input');
+        notesInputEl.value = Validation.desanitize(project.descr);
+        notesInputEl.oninput = Events.debounce(750, (event) => {
+            $<AppState>('app-state').updateProject((oldProj) => {
+                const value = Validation.sanitize((event.target as HTMLTextAreaElement).value);
+                if (oldProj.descr === value) return null;
+                oldProj.descr = value;
+                return oldProj;
+            });
+        });
     }
 
     // eslint-disable-next-line require-jsdoc
