@@ -1,7 +1,7 @@
 import * as styles from './common_styles';
 import { $, Validation, roundNum } from '../lib/utils';
-import type { AppState } from './AppState';
-import { ProjectUpdatedEvent } from './AppState';
+import { AppState } from './AppState';
+import { ProjectUpdatedEvent } from '../lib/events';
 import type { Worker } from '../lib/Project';
 
 const template = document.createElement('template');
@@ -45,7 +45,7 @@ export class WorkersView extends HTMLElement {
      * rounded.**
      */
     public static calcCosts(workers?: Worker[]): number {
-        const list = workers ?? $<AppState>('app-state').state.project.workers;
+        const list = workers ?? $<AppState>(AppState.selector).state.project.workers;
         return list.reduce((sum, { numHours, wage }) => sum + (numHours * wage), 0);
     }
 
@@ -55,7 +55,7 @@ export class WorkersView extends HTMLElement {
             if (event.code !== 'Enter') return;
             const newVal = (event.target as HTMLInputElement).value;
             if (!newVal || Validation.isInvalid(newVal)) return;
-            $<AppState>('app-state').updateProject((project) => {
+            $<AppState>(AppState.selector).updateProject((project) => {
                 const newHours = parseInt(newVal);
                 if (project.workers[rowIdx].numHours + newHours < 0) return null;
                 project.workers[rowIdx].numHours += newHours;
@@ -67,7 +67,7 @@ export class WorkersView extends HTMLElement {
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const stateElement = $<AppState>('app-state');
+        const stateElement = $<AppState>(AppState.selector);
         const workers = stateElement.state.project.workers;
         this.renderWorkersList(workers);
         $('#worker-costs-display', this).textContent = `${roundNum(WorkersView.calcCosts(workers)).toString()}€`;

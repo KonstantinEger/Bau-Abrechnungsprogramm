@@ -1,6 +1,7 @@
-import { AppState, NewProjectEvent } from './components/AppState';
 import type { Material, Worker } from './lib/Project';
 import { $ } from './lib/utils';
+import { AppState } from './components/AppState';
+import { NewProjectEvent } from './lib/events';
 import { Project } from './lib/Project';
 import { ProjectView } from './components/ProjectView';
 import { ipcRenderer as ipc } from 'electron';

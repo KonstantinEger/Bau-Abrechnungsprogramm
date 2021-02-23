@@ -1,8 +1,8 @@
 import * as styles from './common_styles';
 import { $, Validation, roundNum } from '../lib/utils';
-import type { AppState } from './AppState';
+import { AppState } from './AppState';
 import type { Material } from '../lib/Project';
-import { ProjectUpdatedEvent } from './AppState';
+import { ProjectUpdatedEvent } from '../lib/events';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -47,7 +47,7 @@ export class MaterialsView extends HTMLElement {
      * the current project from `AppState` is used. **The result is not rounded.**
      */
     public static calcCosts(materials?: Material[]): number {
-        const list = materials ?? $<AppState>('app-state').state.project.materials;
+        const list = materials ?? $<AppState>(AppState.selector).state.project.materials;
         return list.reduce((sum, { price }) => sum + parseFloat(price), 0);
     }
 
@@ -71,7 +71,7 @@ export class MaterialsView extends HTMLElement {
                 if (kEvent.code !== 'Enter') return;
                 const newVal = input.value;
                 if (!newVal || Validation.isInvalid(newVal)) return;
-                const stateElement = $<AppState>('app-state');
+                const stateElement = $<AppState>(AppState.selector);
                 stateElement.updateProject((oldProj) => {
                     switch (column) {
                         case TableColumn.NAME: {
@@ -97,7 +97,7 @@ export class MaterialsView extends HTMLElement {
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const stateElement = $<AppState>('app-state');
+        const stateElement = $<AppState>(AppState.selector);
         const materials = stateElement.state.project.materials;
         this.renderMatList(materials);
         $('#mat-costs-display', this).textContent = `${roundNum(MaterialsView.calcCosts(materials)).toString()}€`;

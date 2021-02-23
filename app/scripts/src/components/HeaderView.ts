@@ -1,6 +1,7 @@
 import { $, Events, Validation } from '../lib/utils';
-import { AppState, ProjectUpdatedEvent } from './AppState';
+import { AppState } from './AppState';
 import type { Project } from '../lib/Project';
+import { ProjectUpdatedEvent } from '../lib/events';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -80,7 +81,7 @@ export class HeaderView extends HTMLElement {
         const notesInputEl = $<HTMLTextAreaElement>('#notes-input');
         notesInputEl.value = Validation.desanitize(project.descr);
         notesInputEl.oninput = Events.debounce(750, (event) => {
-            $<AppState>('app-state').updateProject((oldProj) => {
+            $<AppState>(AppState.selector).updateProject((oldProj) => {
                 const value = Validation.sanitize((event.target as HTMLTextAreaElement).value);
                 if (oldProj.descr === value) return null;
                 oldProj.descr = value;

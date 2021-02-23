@@ -1,8 +1,8 @@
 import { $, Events, roundNum } from '../lib/utils';
-import type { AppState} from './AppState';
+import { AppState} from './AppState';
 import { MaterialsView } from './MaterialsView';
 import type { Project } from '../lib/Project';
-import { ProjectUpdatedEvent } from './AppState';
+import { ProjectUpdatedEvent } from '../lib/events';
 import { WorkersView } from './WorkersView';
 import { columnHeading } from './common_styles';
 
@@ -89,7 +89,7 @@ export class BillView extends HTMLElement {
     // eslint-disable-next-line require-jsdoc
     public connectedCallback(): void {
         this.appendChild(template.content.cloneNode(true));
-        const stateElement = $<AppState>('app-state');
+        const stateElement = $<AppState>(AppState.selector);
         this.render(stateElement.state.project);
         stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
             this.render(event.detail);
