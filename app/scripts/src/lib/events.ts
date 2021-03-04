@@ -1,15 +1,22 @@
 import type { Project } from './Project';
 import type { State } from '../components/AppState';
 
+export interface NewProjectEventDetail {
+    /** New project instance. */
+    project: Project;
+    /** Should be set to `true` if this project instance has been freshly created, not loaded. */
+    fresh: boolean;
+}
+
 /**
- * Event when a new project is added/loaded. The new project instance
+ * Event when a new project is created/loaded. The new project instance
  * is passed to the event `detail`.
  */
-export class NewProjectEvent extends CustomEvent<Project> {
+export class NewProjectEvent extends CustomEvent<NewProjectEventDetail> {
     public static readonly eventname = 'new-project';
     // eslint-disable-next-line require-jsdoc
-    constructor(project: Project) {
-        super('new-project', { detail: project });
+    constructor(detail: NewProjectEventDetail) {
+        super('new-project', { detail });
     }
 }
 

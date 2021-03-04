@@ -1,7 +1,7 @@
 import type { Material, Worker } from './lib/Project';
+import { NewProjectEvent, ProjectUpdatedEvent } from './lib/events';
 import { $ } from './lib/utils';
 import { AppState } from './components/AppState';
-import { NewProjectEvent } from './lib/events';
 import { Project } from './lib/Project';
 import { ProjectView } from './components/ProjectView';
 import { ipcRenderer as ipc } from 'electron';
@@ -20,12 +20,23 @@ ProjectView.define();
 
 (() => {
     const stateElement = $<AppState>(AppState.selector);
-    stateElement.addEventListener(NewProjectEvent.eventname, () => {
+    stateElement.addEventListener(NewProjectEvent.eventname, ((event: NewProjectEvent) => {
         const appContainer = $<HTMLDivElement>('#app');
         appContainer.innerHTML = '';
         const projectView = document.createElement(ProjectView.selector) as ProjectView;
         appContainer.appendChild(projectView);
-    });
+        if (event.detail.fresh === true) {
+            const { fileLocation } = stateElement.state;
+            const { project } = event.detail;
+            project.save(fileLocation);
+        }
+    }) as EventListener);
+
+    stateElement.addEventListener(ProjectUpdatedEvent.eventname, ((event: ProjectUpdatedEvent) => {
+        const { fileLocation } = stateElement.state;
+        const project = event.detail;
+        project.save(fileLocation);
+    }) as EventListener);
 
     window.onmessage = ({ data }: { data: MessageData }) => {
         switch (data.name) {
@@ -42,7 +53,7 @@ ProjectView.define();
                     shouldGenId: false
                 });
                 project.id = data.project.id;
-                stateElement.newProject({ project, filepath: data.filePath });
+                stateElement.newProject({ project, filepath: data.filePath, fresh: true });
                 break;
             }
             case 'NEW_MATERIAL': {
@@ -84,6 +95,7 @@ ipc.on('open:open-project-dialog', () => {
 ipc.on('dev:load-test-project', () => {
     const stateElement = $<AppState>(AppState.selector);
     stateElement.newProject({
+        fresh: false,
         filepath: 'test-file-path',
         project: new Project({
             brutto: 1234,
@@ -106,5 +118,5 @@ function handleOpenDialogResponse(projAndLoc?: { project: Project; fileLocation:
     if (!projAndLoc) return;
     const { project, fileLocation } = projAndLoc;
     const stateElement = $<AppState>(AppState.selector);
-    stateElement.newProject({ project, filepath: fileLocation });
+    stateElement.newProject({ project, filepath: fileLocation, fresh: false });
 }

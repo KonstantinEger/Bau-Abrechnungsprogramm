@@ -7,6 +7,18 @@ export type State = {
     fileLocation: string;
 };
 
+/** Parameters for setting a new project to the AppState. */
+export interface NewProjectParams {
+    /** Project instance. */
+    project: Project;
+    /** Path to the project file. */
+    filepath: string;
+    /** Set to `false` if the project has been loaded, not created.
+     * This skips writing the file again.
+     */
+    fresh: boolean;
+}
+
 /**
  * WebComponent to contain app state. To `get` the current state,
  * read the `AppState.prototype.state` property. There are multiple ways
@@ -35,13 +47,13 @@ export class AppState extends HTMLElement {
      * Method to call when a _completely new_ project is added to the app.
      * Triggers: `StateChangedEvent`, `NewProjectEvent`.
      */
-    public newProject({ project, filepath }: { project: Project; filepath: string }): void {
+    public newProject({ filepath, project, fresh }: NewProjectParams): void {
         this._state = {
             project,
             fileLocation: filepath
         };
         this.dispatchEvent(new StateChangedEvent(this._state));
-        this.dispatchEvent(new NewProjectEvent(project));
+        this.dispatchEvent(new NewProjectEvent({ project, fresh }));
     }
 
     /**
