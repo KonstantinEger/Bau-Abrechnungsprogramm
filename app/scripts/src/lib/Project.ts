@@ -139,6 +139,7 @@ export class Project {
     }
 
     /**
+     * ! Deprecated
      * Returns the current project saved in session storage and the location
      * of the project file. If one of them is not found, throws an fatal error.
      */
@@ -195,8 +196,6 @@ export class Project {
             if (!csv) { //TODO: Testing required if this fixes #55
                 throwFatalErr('Interner Fehler', 'Konnte das Projekt nicht speichern. Bitte App neu laden');
             }
-            sessionStorage.setItem(Project.storageKeys.project, csv);
-            sessionStorage.setItem(Project.storageKeys.filepath, filePath);
             if (opts?.skipDisk === true) resolve(csv);
             else {
                 writeFile(filePath, csv, { encoding: 'utf8' }, (error) => {

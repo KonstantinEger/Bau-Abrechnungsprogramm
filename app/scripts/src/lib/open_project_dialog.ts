@@ -7,7 +7,7 @@ import { throwFatalErr } from './errors';
  * Opens a dialog window where the user selects a file to be loaded as a
  * project, which is then parsed and returned as a new instance.
  */
-export async function openProjectDialog(): Promise<Project | undefined> {
+export async function openProjectDialog(): Promise<{ project: Project; fileLocation: string } | undefined> {
     const dialog = remote.dialog;
     const browserWin = remote.getCurrentWindow();
 
@@ -33,6 +33,5 @@ export async function openProjectDialog(): Promise<Project | undefined> {
         throwFatalErr(`FS-Fehler [${err.code}]`, err.message);
     }
     const project = Project.fromCsv(csvString);
-    await project.save(filePaths[0], { skipDisk: true, otherCsv: csvString });
-    return project;
+    return { project, fileLocation: filePaths[0] };
 }
